@@ -1,3 +1,4 @@
+import { useState } from "react";
 import "./Home.css";
 
 import Sidebar from "../../components/Sidebar/Sidebar";
@@ -5,12 +6,14 @@ import Hero from "../../components/Hero/Hero";
 import Header from "../../components/Header/Header";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import ActionCard from "../../components/ActionCard/ActionCard";
+import MuukChat from "../../muuk/MuukChat";
 
 import { describirUI } from "../../services/tts";
 
 function Home({ onLogout }) {
 
     const username = localStorage.getItem("username") || "Usuario";
+    const [consulta, setConsulta] = useState("");
 
     return (
         <div className="home">
@@ -23,11 +26,9 @@ function Home({ onLogout }) {
 
                 <Header username={username} />
 
-                <SearchBar
-                    onSearch={(query) => {
-                        console.log("Pregunta:", query);
-                    }}
-                />
+                <SearchBar onSearch={setConsulta} />
+
+                <MuukChat consulta={consulta} />
 
                 <section className="quick-actions">
 

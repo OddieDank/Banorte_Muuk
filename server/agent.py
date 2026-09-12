@@ -110,8 +110,11 @@ def run_muuk(prompt: str, mcp_command: list[str] | None = None) -> MuukResponse:
     Developer API rechaza `props: dict` (additionalProperties).
     Async: agno 3.x solo conecta MCPTools en arun(), no en run() sync."""
     raw = asyncio.run(build_agent(mcp_command).arun(prompt + _hint_intencion(prompt))).content
+    if not isinstance(raw, str):
+        raw = getattr(raw, "text", None) or str(raw)
     try:
-        data = json.loads(raw[raw.index("{"):raw.rindex("}") + 1])
+        data = json.loads(raw[raw.index("{"):raw.rindex("}") + 1], strict=False)
         return MuukResponse.model_validate(data)
-    except Exception:
+    except Exception as e:
+        print(f"[run_muuk] parse falló ({type(e).__name__}: {e}); raw[:200]={raw[:200]!r}")
         return MuukResponse(texto=str(raw), componentes=[])
