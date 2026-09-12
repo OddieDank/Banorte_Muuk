@@ -4,7 +4,7 @@ import type { OneOffAction } from "../a2ui/types";
 
 interface Opcion { meses: number; pago_mensual: number; cat: number; }
 
-register("PlanDePago", (props: Record<string, unknown>, dispatch: (a: OneOffAction) => void) => {
+register("PlanDePago", ({ props, dispatch }: { props: Record<string, unknown>; dispatch: (a: OneOffAction) => void }) => {
   const opciones = (props.opciones as Opcion[]) || [];
   return (
     <div className="muuk-plan">
