@@ -75,10 +75,10 @@ def registrar_interaccion(sesion_id: str, tipo: str, contenido: str, intencion_i
 
 
 @mcp.tool
-def actualizar_preferencia(user_id: str, intencion_id: str, componente_id: str, success: bool) -> dict:
-    """Actualiza score de preferencia UI (aprendizaje)."""
-    db.actualizar_preferencia(user_id, intencion_id, componente_id, success)
-    return {"ok": True}
+def actualizar_preferencia(user_id: str, intencion_nombre: str, componente_nombre: str, success: bool) -> dict:
+    """Actualiza score de preferencia UI por nombre de intención y componente.
+    Ej: actualizar_preferencia('u1', 'PAGAR_DEUDA', 'PlanDePago', True)"""
+    return db.actualizar_preferencia(user_id, intencion_nombre, componente_nombre, success)
 
 
 if __name__ == "__main__":

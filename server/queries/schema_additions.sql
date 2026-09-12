@@ -22,3 +22,10 @@ CREATE TABLE plan_pago (
 
 -- Los grants para mcp_agent viven en transaccion.sql (se ejecuta después de este
 -- script para que plan_pago ya exista).
+
+-- 3. Seed componente_ui (necesario para FK de preferencia_ui)
+INSERT INTO componente_ui (nombre, tipo, descripcion) VALUES
+    ('PlanDePago',    'financiero', 'Opciones de reestructura de deuda con CTA'),
+    ('TablaGastos',   'financiero', 'Tabla de gastos/agregados por categoría'),
+    ('Confirmacion',  'ui',         'Confirmación de acción del usuario')
+ON CONFLICT DO NOTHING;

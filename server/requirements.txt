@@ -1,4 +1,5 @@
 agno
+google-genai
 fastmcp
 pydantic
 fastapi
