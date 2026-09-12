@@ -1,0 +1,6 @@
+agno
+fastmcp
+pydantic
+fastapi
+uvicorn
+psycopg2-binary
