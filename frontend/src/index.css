@@ -1,0 +1,93 @@
+:root {
+    --primary: #d40024;
+    --primary-dark: #b0001e;
+
+    --text: #252525;
+    --text-secondary: #666666;
+
+    --background: #ffffff;
+    --surface: #f7f7f7;
+
+    --border: #dddddd;
+
+    --font: Arial, Helvetica, sans-serif;
+
+    font-family: var(--font);
+
+    color: var(--text);
+    background: var(--background);
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* =================================
+   RESET
+   ================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+html,
+body,
+#root {
+    width: 100%;
+    min-width: 100%;
+    min-height: 100vh;
+}
+
+
+html {
+    background: #ffffff;
+}
+
+
+body {
+    margin: 0;
+
+    background: #ffffff;
+    color: var(--text);
+
+    font-family: var(--font);
+}
+
+
+/* =================================
+   ROOT
+   ================================= */
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    text-align: left;
+}
+
+
+/* =================================
+   TYPOGRAPHY
+   ================================= */
+
+h1,
+h2,
+h3,
+p {
+    margin: 0;
+}
+
+
+button,
+input {
+    font-family: inherit;
+}

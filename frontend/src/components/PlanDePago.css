@@ -1,0 +1,83 @@
+.muuk-plan {
+    width: 100%;
+
+    padding: 28px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #dddddd;
+    border-radius: 4px;
+
+    box-sizing: border-box;
+}
+
+
+.muuk-title {
+    margin: 0 0 24px;
+
+    font-size: 22px;
+    font-weight: 600;
+
+    color: #292929;
+}
+
+
+.muuk-opcion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 24px;
+
+    padding: 18px 0;
+
+    border-top: 1px solid #e2e2e2;
+}
+
+
+.muuk-opcion span {
+    font-size: 15px;
+
+    color: #444444;
+}
+
+
+.muuk-opcion b {
+    color: #292929;
+}
+
+
+.muuk-opcion button {
+    padding: 11px 20px;
+
+    border: none;
+    border-radius: 3px;
+
+    background-color: #b5121b;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s ease;
+}
+
+
+.muuk-opcion button:hover {
+    background-color: #8f0e16;
+}
+
+
+@media (max-width: 600px) {
+    .muuk-opcion {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .muuk-opcion button {
+        width: 100%;
+    }
+}

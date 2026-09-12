@@ -1,0 +1,129 @@
+.search-bar {
+    width: 100%;
+    max-width: 900px;
+    height: 62px;
+
+    display: flex;
+    align-items: center;
+
+    background-color: #f4f4f4;
+
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.search-bar:focus-within {
+    border-color: #b5121b;
+
+    box-shadow: 0 0 0 2px rgba(181, 18, 27, 0.10);
+}
+
+
+/* =================================
+   BOTONES
+   ================================= */
+
+.search-menu-button,
+.search-voice-button,
+.search-submit-button {
+    border: none;
+    background: transparent;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+
+    color: #555555;
+
+    flex-shrink: 0;
+}
+
+
+/* =================================
+   MENÚ
+   ================================= */
+
+.search-menu-button {
+    width: 52px;
+    height: 52px;
+
+    flex-direction: column;
+    gap: 4px;
+}
+
+.menu-line {
+    width: 17px;
+    height: 2px;
+
+    display: block;
+
+    background-color: #555555;
+}
+
+
+/* =================================
+   INPUT
+   ================================= */
+
+.search-input {
+    flex: 1;
+
+    height: 100%;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    padding: 0 12px;
+
+    font-family: inherit;
+    font-size: 16px;
+
+    color: #252525;
+}
+
+.search-input::placeholder {
+    color: #777777;
+}
+
+
+/* =================================
+   MICRÓFONO
+   ================================= */
+
+.search-voice-button {
+    width: 50px;
+    height: 50px;
+}
+
+.search-voice-button:hover {
+    color: #b5121b;
+}
+
+
+/* =================================
+   BUSCAR
+   ================================= */
+
+.search-submit-button {
+    width: 50px;
+    height: 50px;
+
+    margin-right: 5px;
+
+    border-radius: 4px;
+}
+
+.search-submit-button:hover {
+    color: #b5121b;
+    background-color: #eeeeee;
+}

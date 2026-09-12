@@ -1,0 +1,31 @@
+
+.muuk-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 720px;
+    margin-top: 24px;
+}
+
+.muuk-user {
+    align-self: flex-end;
+    padding: 10px 16px;
+    background: #eb0029;
+    color: #fff;
+    border-radius: 16px 16px 4px 16px;
+    margin: 0;
+}
+
+.muuk-texto {
+    align-self: flex-start;
+    margin: 0;
+    color: #292929;
+}
+
+.muuk-detalles {
+    background: #f5f5f5;
+    padding: 12px;
+    border-radius: 4px;
+    overflow-x: auto;
+}

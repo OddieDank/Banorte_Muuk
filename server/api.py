@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Muuk API")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://localhost:5173"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 _RATE_LIMIT = 10
 _rate: dict[str, list[float]] = defaultdict(list)
@@ -113,7 +113,7 @@ def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
         f"{mensaje}"
     )
 
-    resp = agent.build_agent().run(prompt).content
+    resp = agent.run_muuk(prompt)
     return _to_surface(session_id, resp, user_id)
 
 
@@ -153,7 +153,7 @@ def action(req: ActionRequest, request: Request):
 
 
 @app.get("/transacciones")
-def transacciones(user_id: str, request: Request, limit: int = 20):
+def transacciones(request: Request, user_id: str = DEFAULT_USER, limit: int = 20):
     """Detalle crudo para el frontend. Canal separado del LLM: el agente nunca
     ve estas filas. En producción: user_id derivado del token de sesión y rol
     de BD distinto al del agente (mcp_agent no tiene SELECT en transaccion)."""
