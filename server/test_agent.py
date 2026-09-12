@@ -2,12 +2,12 @@ from agent import run_muuk
 
 
 prompt = """
-user_id=a1111111-0000-0000-0000-000000000001
+user_id=a3333333-0000-0000-0000-000000000001
 sesion_id=test-session
 
 El usuario pregunta:
 
-¿En qué estoy gastando demasiado?
+Quiero pagar mi deuda a 12 meses
 """
 
 response = run_muuk(prompt)
