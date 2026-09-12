@@ -1,6 +1,6 @@
 # Banorte × Muuk
 
-Agente de IA que **construye la interfaz** en tiempo real: Utilizando → Agno → FastMCP → A2UI → TigerData.
+Agente de IA que **construye la interfaz** en tiempo real: Usuario → Agno → FastMCP → A2UI → TigerData.
 
 ## Correr
 
@@ -26,3 +26,43 @@ Frontend: `cd frontend && pnpm dev` / `npm run dev`.
   `GET /transacciones` directo al frontend (canal separado del LLM).
   `TablaGastos` soporta `dataRef`.
 - **Siguiente: M3** — correr contra Gemini real + integrar app Next.
+
+---
+
+## Propuesta alterna de estructura (Vale) — pendiente de discusión en equipo
+
+> Nota: esta propuesta asume backend TypeScript; el stack actual implementado
+> es Python (Agno + FastMCP). Decidir en equipo antes de seguir.
+
+```
+src/
+├── screens/
+│   ├── HomeScreen.tsx
+│   └── ...
+├── components/
+│   ├── ChatInput.tsx
+│   └── ...
+├── a2ui/
+│   └── renderer/
+└── api/
+    └── backend.ts
+
+backend/
+├── server.ts
+├── agent/
+│   ├── gemini.ts
+│   └── prompts.ts
+├── middleware/
+│   ├── auth.ts
+│   ├── validation.ts
+│   ├── permissions.ts
+│   └── uiPlanner.ts
+├── database/
+│   └── tigerdata.ts
+├── mcp/
+│   └── bankServer.ts
+├── a2ui/
+│   └── generator.ts
+└── voice/
+    └── elevenlabs.ts
+```
