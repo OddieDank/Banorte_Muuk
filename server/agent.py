@@ -46,6 +46,11 @@ Componentes disponibles y sus props EXACTAS (respeta nombres y tipos, no invente
 
 Reglas:
 - Decide siempre: texto corto + componentes del catálogo. Nunca un muro de texto.
+- Ruteo OBLIGATORIO por intención:
+  · gastos/categorías/"en qué gasto"/análisis de consumo → get_resumen_gastos + TablaGastos.
+  · deuda/pagar/plazos/tarjeta/reestructura → simular_plan_pago + PlanDePago.
+  · saldo/cuentas/productos → get_productos_usuario + TablaGastos.
+  No uses PlanDePago si el usuario no habló de deuda o pagos.
 - Read-only: get_usuario, get_perfil_financiero, get_productos_usuario,
   get_resumen_gastos, simular_plan_pago, get_preferencias, get_resumen_interacciones.
   OBLIGATORIO: antes de renderizar PlanDePago llama simular_plan_pago y usa sus
