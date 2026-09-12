@@ -40,11 +40,6 @@ function Home({ onLogout }) {
                         }}
                     />
 
-                    <ActionCard
-                        title="Asistente financiero"
-                        description="Consulta información sobre productos, movimientos y servicios disponibles."
-                    />
-
                 </section>
 
                 <button

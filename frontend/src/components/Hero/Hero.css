@@ -30,8 +30,6 @@
     width: 62%;
     height: 100%;
 
-    background-image: url("/hero-background.jpg");
-
     background-size: cover;
     background-position: center;
 
@@ -145,22 +143,6 @@
 
     .hero-background {
         width: 52%;
-
-        background-image:
-            linear-gradient(
-                to right,
-                #f4f4f4 0%,
-                #f4f4f4 20%,
-                rgba(244, 244, 244, 0.95) 40%,
-                rgba(244, 244, 244, 0.65) 60%,
-                rgba(244, 244, 244, 0.15) 80%,
-                rgba(244, 244, 244, 0) 100%
-            ),
-            url("/banorte-hero.jpg");
-
-        background-size: cover;
-        background-position: center;
-
         clip-path: none;
     }
 

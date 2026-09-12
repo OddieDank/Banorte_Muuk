@@ -54,29 +54,3 @@
         font-size: 24px;
     }
 }
-
-@media (max-width: 700px) {
-
-    .hero {
-        height: 180px;
-        margin-bottom: 30px;
-
-        border-radius: 0 0 45px 0;
-    }
-
-    .hero-content {
-        padding-left: 25px;
-    }
-
-    .hero-logo {
-        width: 155px;
-    }
-
-    .hero-subtitle {
-        font-size: 11px;
-    }
-
-    .hero-background {
-        width: 70%;
-    }
-}
