@@ -85,11 +85,31 @@ def build_agent(mcp_command: list[str] | None = None) -> Agent:
     )
 
 
+# Router determinista por keywords: el modelo lite no siempre obedece la regla
+# de ruteo del prompt, así que la intención se detecta en código y se inyecta.
+_RUTAS = [
+    (("gasto", "gastos", "consumo", "categoría", "categoria"),
+     "CONSULTAR_GASTOS → llama get_resumen_gastos y responde con TablaGastos"),
+    (("deuda", "pagar", "plazo", "tarjeta", "reestructura", "meses"),
+     "PAGAR_DEUDA → llama simular_plan_pago y responde con PlanDePago"),
+    (("saldo", "cuenta", "producto", "inversión", "inversion"),
+     "CONSULTAR_SALDO → llama get_productos_usuario y responde con TablaGastos"),
+]
+
+
+def _hint_intencion(prompt: str) -> str:
+    low = prompt.lower()
+    for keywords, ruta in _RUTAS:
+        if any(k in low for k in keywords):
+            return f"\nINTENCIÓN DETECTADA (obligatoria, no la cambies): {ruta}."
+    return ""
+
+
 def run_muuk(prompt: str, mcp_command: list[str] | None = None) -> MuukResponse:
     """Corre el agente y parsea su JSON. output_schema no se usa: Gemini
     Developer API rechaza `props: dict` (additionalProperties).
     Async: agno 3.x solo conecta MCPTools en arun(), no en run() sync."""
-    raw = asyncio.run(build_agent(mcp_command).arun(prompt)).content
+    raw = asyncio.run(build_agent(mcp_command).arun(prompt + _hint_intencion(prompt))).content
     try:
         data = json.loads(raw[raw.index("{"):raw.rindex("}") + 1])
         return MuukResponse.model_validate(data)
