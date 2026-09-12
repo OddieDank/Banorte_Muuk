@@ -16,16 +16,16 @@ Frontend: `cd frontend && pnpm dev` / `npm run dev`.
 
 ## Estado
 
-- **M1 ✅** — scaffold del agente: `catalog.py`, `db.py`, `mcp_server.py`,
+ — scaffold del agente: `catalog.py`, `db.py`, `mcp_server.py`,
   `agent.py`, `api.py`, `validate_a2ui.py` (5/5). Frontend inicial.
-- **M2 ✅** — alineado al esquema Tiger Data del compañero. `db.py` usa PG
+ — alineado al esquema Tiger Data del compañero. `db.py` usa PG
   cuando `DATABASE_URL` está set, SQLite fallback para dev. Ver
   `server/schema_additions.sql` para cambios sugeridos al esquema.
-- **M2.5 ✅** — privacidad por diseño: agente solo ve agregados
+ — privacidad por diseño: agente solo ve agregados
   (`get_resumen_gastos` sobre `transaccion_resumen`); detalle crudo por
   `GET /transacciones` directo al frontend (canal separado del LLM).
   `TablaGastos` soporta `dataRef`.
-- **Siguiente: M3** — correr contra Gemini real + integrar app Next.
+- **Siguiente** — correr contra Gemini real + integrar app Next.
 
 ---
 
