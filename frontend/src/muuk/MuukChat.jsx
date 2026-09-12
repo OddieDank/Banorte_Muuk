@@ -11,6 +11,7 @@ import "./MuukChat.css";
 
 const API = "http://localhost:8000";
 const SESSION_ID = crypto.randomUUID();
+const USER_ID = localStorage.getItem("user_id");
 
 function MuukChat({ consulta }) {
     const [bloques, setBloques] = useState([]);
@@ -25,7 +26,7 @@ function MuukChat({ consulta }) {
             const res = await fetch(`${API}/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ session_id: SESSION_ID, mensaje: consulta }),
+                body: JSON.stringify({ session_id: SESSION_ID, mensaje: consulta, user_id: USER_ID }),
                 signal: ctrl.signal,
             });
 
@@ -69,7 +70,7 @@ function MuukChat({ consulta }) {
         const res = await fetch(`${API}/action`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...accion, session_id: SESSION_ID }),
+            body: JSON.stringify({ ...accion, session_id: SESSION_ID, user_id: USER_ID }),
         });
         const data = await res.json();
         setBloques((b) => [...b, {

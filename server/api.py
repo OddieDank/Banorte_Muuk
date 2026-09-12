@@ -160,6 +160,11 @@ def transacciones(request: Request, user_id: str = DEFAULT_USER, limit: int = 20
     _check_rate(request.client.host if request.client else "demo")
     return db.get_transacciones(user_id, limit)
 
+@app.get("/usuarios")
+def usuarios(request: Request):
+    _check_rate(request.client.host if request.client else "demo")
+    return db.get_usuarios()
+
 @app.post("/tts")
 def tts(req: TTSRequest, request: Request):
     _check_rate(request.client.host if request.client else "demo")
