@@ -8,10 +8,14 @@ import os
 from contextlib import closing
 from datetime import date, datetime
 from decimal import Decimal
+from pathlib import Path
 from uuid import UUID
 
 import psycopg2
 import psycopg2.extras
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / ".env")  # no pisa vars de entorno ya definidas
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -108,7 +112,7 @@ def ensure_sesion(sesion_id: str, user_id: str, canal: str = "web") -> str:
     return sesion_id
 
 
-def registrar_interaccion(sesion_id: str, intencion_id: str | None, tipo: str, contenido: str) -> dict:
+def registrar_interaccion(sesion_id: str, tipo: str, contenido: str, intencion_id: str | None = None) -> dict:
     return _q1(
         """INSERT INTO interaccion (sesion_id, intencion_id, tipo, contenido)
            VALUES (%s, %s, %s, %s) RETURNING interaccion_id, "timestamp" """,

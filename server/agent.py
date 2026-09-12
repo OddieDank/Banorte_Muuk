@@ -5,8 +5,15 @@ del catálogo. api.py convierte esto en mensajes A2UI (createSurface /
 surfaceUpdate / dataModelUpdate / deleteSurface) y lo valida siempre.
 """
 
+import asyncio
+import json
 import os
+import sys
 from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / ".env")
 
 from agno.agent import Agent
 from agno.models.google import Gemini
@@ -25,17 +32,24 @@ class MuukResponse(BaseModel):
     componentes: list[Componente]
 
 
+_SCHEMAS = json.dumps(
+    {nombre: schema.model_json_schema() for nombre, schema in CATALOG.items()},
+    ensure_ascii=False,
+)
+
 INSTRUCTIONS = f"""
 Eres Muuk, el asistente financiero de Banorte que genera interfaces vivas.
 
 Intenciones conocidas: AHORRAR, INVERTIR, PAGAR_DEUDA, CONSULTAR_SALDO, TRANSFERIR.
-Componentes disponibles: {list(CATALOG)}.
+Componentes disponibles y sus props EXACTAS (respeta nombres y tipos, no inventes otras):
+{_SCHEMAS}
 
 Reglas:
 - Decide siempre: texto corto + componentes del catálogo. Nunca un muro de texto.
 - Read-only: get_usuario, get_perfil_financiero, get_productos_usuario,
   get_resumen_gastos, simular_plan_pago, get_preferencias, get_resumen_interacciones.
-  Úsalos antes de renderizar opciones numéricas.
+  OBLIGATORIO: antes de renderizar PlanDePago llama simular_plan_pago y usa sus
+  cifras exactas (pago_mensual, cat). NUNCA inventes montos ni tasas.
 - Privacidad: solo ves agregados de gasto, nunca transacciones crudas. En
   TablaGastos usa props con dataRef (p. ej. "/api/transacciones").
 - NUNCA llamas `aplicar_plan` salvo que el mensaje del usuario haya sido generado
@@ -47,16 +61,32 @@ Reglas:
 - Registra qué funcionó: cuando el usuario interactúa con un componente, usa
   actualizar_preferencia(intencion_nombre, componente_nombre, success).
 - Eres banca: cifras claras, CAT visible, sin modismos coloquiales abusivos.
+
+FORMATO DE RESPUESTA (obligatorio):
+Responde SOLO con JSON válido, sin markdown ni texto extra:
+{{"texto": "mensaje corto para el usuario",
+  "componentes": [{{"type": "<tipo del catálogo>", "props": {{...}}}}]}}
 """
 
 
 def build_agent(mcp_command: list[str] | None = None) -> Agent:
-    cmd = mcp_command or ["python", str(Path(__file__).parent / "mcp_server.py")]
+    cmd = mcp_command or [sys.executable, str(Path(__file__).parent / "mcp_server.py")]
     return Agent(
         name="Muuk",
-        model=Gemini(id=os.getenv("GEMINI_MODEL", "gemini-2.5-flash")),
+        model=Gemini(id=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), api_key=os.getenv("GEMINI_API_KEY")),
         tools=[MCPTools(command=" ".join(cmd))],
         instructions=INSTRUCTIONS,
-        output_schema=MuukResponse,
         markdown=False,
     )
+
+
+def run_muuk(prompt: str, mcp_command: list[str] | None = None) -> MuukResponse:
+    """Corre el agente y parsea su JSON. output_schema no se usa: Gemini
+    Developer API rechaza `props: dict` (additionalProperties).
+    Async: agno 3.x solo conecta MCPTools en arun(), no en run() sync."""
+    raw = asyncio.run(build_agent(mcp_command).arun(prompt)).content
+    try:
+        data = json.loads(raw[raw.index("{"):raw.rindex("}") + 1])
+        return MuukResponse.model_validate(data)
+    except Exception:
+        return MuukResponse(texto=str(raw), componentes=[])

@@ -71,7 +71,7 @@ def aplicar_plan(user_id: str, meses: int, pago_mensual: float, cat: float, mont
 @mcp.tool
 def registrar_interaccion(sesion_id: str, tipo: str, contenido: str, intencion_id: str | None = None) -> dict:
     """Bitácora de interacciones: la memoria que usa Muuk para adaptar la UI."""
-    return db.registrar_interaccion(sesion_id, intencion_id, tipo, contenido)
+    return db.registrar_interaccion(sesion_id, tipo, contenido, intencion_id)
 
 
 @mcp.tool

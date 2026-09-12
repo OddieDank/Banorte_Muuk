@@ -103,7 +103,7 @@ def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
         f"{mensaje}"
     )
 
-    resp = agent.build_agent().run(prompt).content
+    resp = agent.run_muuk(prompt)
     return _to_surface(session_id, resp, user_id)
 
 
