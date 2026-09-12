@@ -91,29 +91,19 @@ def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
 
 
 def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
-    # Cargar contexto completo del usuario para personalización
-    usuario = db.get_usuario(user_id)
-    perfil = db.get_perfil_financiero(user_id)
-    productos = db.get_productos_usuario(user_id)
-    gastos = db.get_resumen_gastos(user_id)
-    preferencias = db.get_preferencias(user_id)
     historial = db.get_resumen_interacciones(session_id)
 
-    contexto = {
-        "nombre": usuario.get("nombre") if usuario else None,
-        "perfil_financiero": perfil,
-        "productos": productos,
-        "gastos_agregados": gastos,
-        "preferencias_ui": preferencias,
-    }
-
     prompt = (
-        f"CONTEXTO DEL USUARIO: {json.dumps(contexto, default=str)}\n"
+        f"CONTEXTO DE SESIÓN:\n"
+        f"user_id={user_id}\n"
+        f"session_id={session_id}\n"
         f"HISTORIAL: {json.dumps(historial, default=str)}\n\n"
+        f"MENSAJE DEL USUARIO:\n"
         f"{mensaje}"
     )
 
     resp = agent.run_muuk(prompt)
+
     return _to_surface(session_id, resp, user_id)
 
 
