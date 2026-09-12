@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+# Node / Frontend
+node_modules/
+.next/
+dist/out/
+
+# Secrets — nunca commitear
+.env
+.env.*
+!.env.example
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs / temporales
+*.log
+.DS_Store
+
+# Docs internos — no publicar en el repo
+PLAN_DE_TRABAJO.md
+presentacion.txt
