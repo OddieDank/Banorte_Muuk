@@ -8,6 +8,7 @@ Rutas:
 import json
 import time
 import uuid
+
 from collections import defaultdict
 
 import agent
@@ -18,6 +19,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+#elevenLabs
+import voice
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Muuk API")
 app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000"], allow_methods=["GET", "POST"], allow_headers=["*"])
@@ -49,6 +56,9 @@ class ActionRequest(BaseModel):
     evento: str
     payload: dict = {}
     user_id: str = DEFAULT_USER
+
+class TTSRequest(BaseModel):
+    text:str
 
 
 def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
@@ -149,3 +159,9 @@ def transacciones(user_id: str, request: Request, limit: int = 20):
     de BD distinto al del agente (mcp_agent no tiene SELECT en transaccion)."""
     _check_rate(request.client.host if request.client else "demo")
     return db.get_transacciones(user_id, limit)
+
+@app.post("/tts")
+def tts(req: TTSRequest, request: Request):
+    _check_rate(request.client.host if request.client else "demo")
+    audio = voice.synthesize_speech(req.texto)
+    return StreamingResponse(iter([audio]), media_type="audio/mpeg")
