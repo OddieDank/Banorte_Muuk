@@ -13,10 +13,13 @@ from uuid import UUID
 import psycopg2
 import psycopg2.extras
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://tsdbadmin:qc38z1yek1d9w64t@ki2x01xbbo.wpmuts1dpc.tsdb.cloud.timescale.com:30559/tsdb?sslmode=require",
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL no está definida. Agrégala a server/.env "
+        "(ver server/.env.example)."
+    )
 
 
 def _conn():
