@@ -14,7 +14,8 @@ register("TablaGastos", ({ props }: { props: Record<string, unknown> }) => {
     if (!props.dataRef) return;
     // dataRef viene como "/api/transacciones"; el endpoint real es "/transacciones"
     const path = String(props.dataRef).replace(/^\/api/, "");
-    fetch(`${API}${path}`)
+    const userId = localStorage.getItem("user_id");
+    fetch(`${API}${path}?user_id=${userId}`)
       .then((r) => r.json())
       .then((rows: { categoria: string; monto: number }[]) =>
         setFilas(rows.map((r) => ({ concepto: r.categoria, monto: r.monto, categoria: r.categoria })))

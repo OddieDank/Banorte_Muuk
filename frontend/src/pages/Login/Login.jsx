@@ -7,8 +7,9 @@ function Login({ onLogin }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [cargando, setCargando] = useState(false);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
 
         if (!username.trim() || !password.trim()) {
@@ -17,11 +18,40 @@ function Login({ onLogin }) {
         }
 
         setError("");
+        setCargando(true);
 
-        localStorage.setItem("username", username);
+        try {
+            const respuesta = await fetch("http://localhost:8000/usuarios");
+            if (!respuesta.ok) {
+                setError("No se pudo conectar con el servidor.");
+                return;
+            }
 
-        if (onLogin) {
-            onLogin(username);
+            const usuarios = await respuesta.json();
+            const buscado = username.trim().toLowerCase();
+
+            // Coincide con el nombre completo o solo el primer nombre
+            const encontrado = usuarios.find((u) => {
+                const nombreCompleto = u.nombre.toLowerCase();
+                const primerNombre = nombreCompleto.split(" ")[0];
+                return nombreCompleto === buscado || primerNombre === buscado;
+            });
+
+            if (!encontrado) {
+                setError("Usuario no encontrado. Prueba con Ana, Roberto o Marisol.");
+                return;
+            }
+
+            localStorage.setItem("user_id", encontrado.user_id);
+            localStorage.setItem("username", encontrado.nombre);
+
+            if (onLogin) {
+                onLogin(encontrado);
+            }
+        } catch (err) {
+            setError("Error al conectar con el servidor.");
+        } finally {
+            setCargando(false);
         }
     };
 
@@ -89,8 +119,9 @@ function Login({ onLogin }) {
                     <button
                         type="submit"
                         className="login-button"
+                        disabled={cargando}
                     >
-                        Ingresar
+                        {cargando ? "Verificando..." : "Ingresar"}
                     </button>
 
                 </form>

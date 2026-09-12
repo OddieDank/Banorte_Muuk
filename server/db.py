@@ -60,6 +60,9 @@ def _q1(sql: str, params: tuple = ()) -> dict | None:
 def get_usuario(user_id: str) -> dict | None:
     return _q1("SELECT * FROM usuario WHERE user_id = %s", (user_id,))
 
+def get_usuarios() -> list[dict]:
+    """Lista de los usuarios demo, para el selector de login del frontend."""
+    return _q("SELECT user_id, nombre FROM usuario")
 
 def get_perfil_financiero(user_id: str) -> dict | None:
     return _q1("SELECT * FROM perfil_financiero WHERE user_id = %s", (user_id,))
