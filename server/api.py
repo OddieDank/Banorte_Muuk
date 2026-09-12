@@ -163,5 +163,5 @@ def transacciones(request: Request, user_id: str = DEFAULT_USER, limit: int = 20
 @app.post("/tts")
 def tts(req: TTSRequest, request: Request):
     _check_rate(request.client.host if request.client else "demo")
-    audio = voice.synthesize_speech(req.texto)
+    audio = voice.synthesize_speech(req.text)  # antes decía req.texto
     return StreamingResponse(iter([audio]), media_type="audio/mpeg")
