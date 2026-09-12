@@ -6,6 +6,8 @@ import Header from "../../components/Header/Header";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import ActionCard from "../../components/ActionCard/ActionCard";
 
+import { describirUI } from "../../services/tts";
+
 function Home({ onLogout }) {
 
     const username = localStorage.getItem("username") || "Usuario";
@@ -43,6 +45,17 @@ function Home({ onLogout }) {
                     />
 
                 </section>
+
+                <button
+                    className="tts-button"
+                    onClick={() =>
+                        describirUI(
+                            "Bienvenido al asistente digital de Banorte."
+                        )
+                    }
+                >
+                    Escuchar presentación
+                </button>
 
             </main>
 
