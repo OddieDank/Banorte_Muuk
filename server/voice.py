@@ -18,6 +18,7 @@ _cache: dict[str, bytes] = {}
 def synthesize_speech(texto: str) -> bytes:
     if texto in _cache:
         return _cache[texto]
+    
 
     audio_stream = _client.text_to_speech.convert(
         text=texto,
