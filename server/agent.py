@@ -9,6 +9,7 @@ import asyncio
 import json
 import os
 import sys
+import threading
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -105,11 +106,27 @@ def _hint_intencion(prompt: str) -> str:
     return ""
 
 
+# Un solo agente + una sola conexión MCP para todo el proceso: reconectar por
+# request levantaba un servidor MCP nuevo (boot de varios segundos por mensaje).
+_LOOP = asyncio.new_event_loop()
+_LOCK = threading.Lock()
+_AGENT: Agent | None = None
+
+
+def _get_agent() -> Agent:
+    global _AGENT
+    if _AGENT is None:
+        _AGENT = build_agent()
+        _LOOP.run_until_complete(_AGENT.tools[0].connect())
+    return _AGENT
+
+
 def run_muuk(prompt: str, mcp_command: list[str] | None = None) -> MuukResponse:
     """Corre el agente y parsea su JSON. output_schema no se usa: Gemini
     Developer API rechaza `props: dict` (additionalProperties).
     Async: agno 3.x solo conecta MCPTools en arun(), no en run() sync."""
-    raw = asyncio.run(build_agent(mcp_command).arun(prompt + _hint_intencion(prompt))).content
+    with _LOCK:  # FastAPI corre endpoints sync en threadpool; un loop a la vez
+        raw = _LOOP.run_until_complete(_get_agent().arun(prompt + _hint_intencion(prompt))).content
     if not isinstance(raw, str):
         raw = getattr(raw, "text", None) or str(raw)
     try:

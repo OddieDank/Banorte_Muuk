@@ -7,7 +7,7 @@ interface Fila { concepto: string; monto: number; categoria: string; }
 
 const API = "http://localhost:8000";
 
-register("TablaGastos", (props: Record<string, unknown>) => {
+register("TablaGastos", ({ props }: { props: Record<string, unknown> }) => {
   const [filas, setFilas] = useState<Fila[]>((props.filas as Fila[]) || []);
 
   useEffect(() => {
@@ -27,7 +27,7 @@ register("TablaGastos", (props: Record<string, unknown>) => {
       <h3 className="muuk-title">{String(props.titulo ?? "Gastos")}</h3>
       {filas.map((f, i) => (
         <div key={i} className="muuk-opcion">
-          <span>{f.concepto} · {f.categoria}</span>
+          <span>{f.concepto === f.categoria ? f.concepto : `${f.concepto} · ${f.categoria}`}</span>
           <b>{f.monto.toLocaleString("es-MX", { style: "currency", currency: "MXN" })}</b>
         </div>
       ))}
