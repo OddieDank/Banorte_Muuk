@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from fastapi import UploadFile, File
 #elevenLabs
 import voice
 
@@ -241,4 +242,27 @@ def challenges(request: Request, user_id: str = DEFAULT_USER):
     return {
         "user_id": user_id,
         "challenges": db.get_retos_disponibles(user_id)
+    }
+
+
+@app.post("/stt")
+async def stt(request: Request, file: UploadFile = File(...)):
+    _check_rate(request.client.host if request.client else "demo")
+    audio_bytes = await file.read()
+    texto = voice.transcribe_speech(audio_bytes)
+    return {"text": texto}
+
+
+@app.get("/perfil")
+def perfil(request: Request, user_id: str = DEFAULT_USER):
+    _check_rate(request.client.host if request.client else "demo")
+    usuario = db.get_usuario(user_id)
+
+    if not usuario:
+        raise HTTPException(404, "usuario no encontrado")
+
+    return {
+        "usuario": usuario,
+        "perfil_financiero": db.get_perfil_financiero(user_id),
+        "productos": db.get_productos_usuario(user_id),
     }

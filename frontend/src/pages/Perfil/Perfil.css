@@ -1,0 +1,188 @@
+.perfil-page {
+    width: 100%;
+    max-width: 920px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding-top: 10px;
+}
+
+
+/* =================================
+   VOLVER
+   ================================= */
+
+.perfil-back {
+    align-self: flex-start;
+
+    margin-bottom: 20px;
+
+    padding: 11px 22px;
+
+    border: 1px solid #d40024;
+    border-radius: 4px;
+
+    background-color: #ffffff;
+    color: #d40024;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.perfil-back:hover {
+    background-color: #d40024;
+    color: #ffffff;
+}
+
+.perfil-back:active {
+    transform: translateY(1px);
+}
+
+
+/* =================================
+   TÍTULO
+   ================================= */
+
+.perfil-titulo {
+    margin: 0 0 28px;
+
+    font-size: 32px;
+    font-weight: 700;
+
+    color: #1a1a1a;
+}
+
+
+/* =================================
+   TARJETAS
+   ================================= */
+
+.perfil-card {
+    position: relative;
+
+    display: flex;
+    align-items: stretch;
+
+    margin-bottom: 20px;
+
+    background-color: #ffffff;
+
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+
+    overflow: hidden;
+}
+
+.perfil-card-accent {
+    width: 4px;
+    flex-shrink: 0;
+
+    background-color: #b5121b;
+}
+
+.perfil-card-content {
+    flex: 1;
+
+    padding: 24px 28px;
+}
+
+.perfil-card-content h2 {
+    margin: 0 0 16px;
+
+    font-size: 18px;
+    font-weight: 600;
+
+    color: #292929;
+}
+
+
+/* =================================
+   FILAS DE DATOS
+   ================================= */
+
+.perfil-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    padding: 8px 0;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 14px;
+}
+
+.perfil-fila:last-child {
+    border-bottom: none;
+}
+
+.perfil-label {
+    color: #777777;
+}
+
+.perfil-valor {
+    font-weight: 600;
+    color: #292929;
+
+    text-align: right;
+}
+
+
+/* =================================
+   PRODUCTOS
+   ================================= */
+
+.perfil-lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.perfil-lista li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #eeeeee;
+
+    font-size: 14px;
+}
+
+.perfil-lista li:last-child {
+    border-bottom: none;
+}
+
+.perfil-producto-nombre {
+    font-weight: 600;
+    color: #292929;
+}
+
+.perfil-producto-estado {
+    color: #777777;
+    text-transform: capitalize;
+}
+
+.perfil-vacio {
+    color: #777777;
+    font-size: 14px;
+}
+
+
+/* =================================
+   ERROR
+   ================================= */
+
+.perfil-error {
+    color: #b5121b;
+}
