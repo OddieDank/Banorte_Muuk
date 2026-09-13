@@ -180,6 +180,47 @@
 
 
 /* =================================
+   PROGRESO DEL PLAN
+   ================================= */
+
+.perfil-progreso-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    padding: 12px 0 8px;
+
+    font-size: 14px;
+}
+
+.perfil-progreso-barra {
+    width: 100%;
+    height: 8px;
+
+    background-color: #eeeeee;
+    border-radius: 4px;
+
+    overflow: hidden;
+}
+
+.perfil-progreso-relleno {
+    height: 100%;
+
+    background-color: #b5121b;
+
+    transition: width 0.3s ease;
+}
+
+.perfil-nota {
+    margin: 10px 0 0;
+
+    font-size: 12px;
+    font-style: italic;
+    color: #999999;
+}
+
+
+/* =================================
    ERROR
    ================================= */
 
