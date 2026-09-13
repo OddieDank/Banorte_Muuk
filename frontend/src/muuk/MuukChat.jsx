@@ -104,11 +104,13 @@ function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva, setVozA
                     } else if (msg.type === "TEXT_MESSAGE_CONTENT") {
                         textoAcumulado += msg.delta || "";
                     } else if (msg.type === "TEXT_MESSAGE_END") {
-                        if (textoAcumulado) {
-                            setBloques((b) => [...b, { tipo: "texto", texto: textoAcumulado }]);
-                            if (vozActiva) describirUI(textoAcumulado);
-                            textoAcumulado = "";
+                        // Solo burbuja si hay texto: Gemini a veces emite START/END vacío.
+                        const t = textoAcumulado.trim();
+                        if (t) {
+                            setBloques((b) => [...b, { tipo: "texto", texto: t }]);
+                            if (vozActiva) describirUI(t);
                         }
+                        textoAcumulado = "";
                     } else if (msg.type === "ACTIVITY_SNAPSHOT" && msg.activityType === "a2ui-surface") {
                         const ops = msg.content?.a2ui_operations || [];
                         const createOp = ops.find((o) => o.createSurface);
