@@ -39,7 +39,8 @@ uvicorn api:app --port 8000
 ```bash
 cd Banorte_Muuk/frontend
 npm install
-npm run dev        # http://localhost:5173
+cp .env.example .env   # VITE_API_URL=http://localhost:8000
+npm run dev            # http://localhost:5173
 ```
 
 ### 3. Probar
