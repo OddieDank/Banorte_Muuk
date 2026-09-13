@@ -27,7 +27,22 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Muuk API")
-app.add_middleware(CORSMiddleware, allow_origins=["http://localhost:3000", "http://localhost:5173"], allow_methods=["GET", "POST"], allow_headers=["*"])
+
+# Un único CORSMiddleware con todos los orígenes permitidos.
+# (Tener más de uno causaba que las peticiones POST con preflight,
+# como /login, fueran bloqueadas por el navegador en producción.)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://banorte-muuk.vercel.app",   # tu URL de Vercel
+        "https://godmuuk.tech",             # tu dominio (ajusta al real)
+        "https://www.godmuuk.tech",         # si vas a usar el www también
+    ],
+    allow_methods=["GET", "POST"],
+    allow_headers=["*"],
+)
 
 _RATE_LIMIT = 10
 _rate: dict[str, list[float]] = defaultdict(list)
@@ -266,16 +281,3 @@ def perfil(request: Request, user_id: str = DEFAULT_USER):
         "perfil_financiero": db.get_perfil_financiero(user_id),
         "productos": db.get_productos_usuario(user_id),
     }
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "https://banorte-muuk.vercel.app",   # tu URL de Vercel
-        "https://godmuuk.tech",             # tu dominio (ajusta al real)
-        "https://www.godmuuk.tech",         # si vas a usar el www también
-    ],
-    allow_methods=["GET", "POST"],
-    allow_headers=["*"],
-)
