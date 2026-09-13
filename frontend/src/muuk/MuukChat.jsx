@@ -91,10 +91,12 @@ function MuukChat({ consulta }) {
             body: JSON.stringify({ ...accion, session_id: sessionRef.current, user_id: getUserId() }),
         });
         const data = await res.json();
-        setBloques((b) => [...b, {
-            tipo: "texto",
-            texto: data.plan ? `Plan aplicado (id ${data.plan.plan_id}).` : "Acción registrada.",
-        }]);
+        if (data.plan) {
+            setBloques((b) => [...b, {
+                tipo: "texto",
+                texto: `Plan aplicado (id ${data.plan.plan_id}).`,
+            }]);
+        }
     };
 
     if (bloques.length === 0 && !cargando) return null;
@@ -105,7 +107,7 @@ function MuukChat({ consulta }) {
                 b.tipo === "surface" ? (
                     <div key={i} className="muuk-surface">
                         {b.surface.components.map((c) => (
-                            <div key={c.componentId}>{renderComponent(c, dispatch)}</div>
+                            <div key={c.componentId} className={c.componentType?.startsWith("Grafica") ? "muuk-grande" : ""}>{renderComponent(c, dispatch)}</div>
                         ))}
                     </div>
                 ) : (

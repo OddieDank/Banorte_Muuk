@@ -16,11 +16,12 @@
     align-items: stretch;
 }
 
-/* El componente preferido del usuario (primero por score en el servidor)
-   ocupa más ancho: se muestra "primero y más grande". Solo en pantallas
-   donde el grid cabe en ≥2 columnas. */
+/* El componente preferido (primero por score) y TODAS las gráficas
+   (Grafica*) ocupan más ancho: lo principal de la respuesta se ve grande.
+   Solo en pantallas donde el grid cabe en ≥2 columnas. */
 @media (min-width: 720px) {
-    .muuk-surface > div:first-child {
+    .muuk-surface > div:first-child,
+    .muuk-surface > .muuk-grande {
         grid-column: span 2;
     }
 }
@@ -113,6 +114,7 @@
 
 body.muuk-dark .muuk-plan,
 body.muuk-dark .muuk-loader,
+body.muuk-dark .muuk-texto,
 body.muuk-dark .muuk-detalles {
     background: #1e1e1e;
     color: #f5f5f5;
@@ -204,9 +206,15 @@ body.muuk-dark .muuk-leyenda li.activa {
 }
 
 .muuk-texto {
-    align-self: flex-start;
+    align-self: stretch;
     margin: 0;
+    padding: 14px 18px;
+    background: #f5f5f5;
+    border-left: 4px solid #b5121b;
+    border-radius: 0 10px 10px 0;
     color: #292929;
+    max-width: 960px;
+    line-height: 1.45;
 }
 
 .muuk-detalles {

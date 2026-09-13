@@ -40,7 +40,7 @@ register("GraficaLinea", ({ props, dispatch }: { props: Record<string, unknown>;
             <text x={x(i)} y={y(p.valor) - 3} textAnchor="middle" className="muuk-linea-val">
               {sel === i ? formato(p.valor) : ""}
             </text>
-            <text x={x(i)} y={49} textAnchor="middle" className="muuk-linea-etq">{p.etiqueta}</text>
+            <text x={x(i)} y={49} textAnchor="end" transform={`rotate(-38, ${x(i)}, 49)`} className="muuk-linea-etq">{p.etiqueta}</text>
           </g>
         ))}
       </svg>
