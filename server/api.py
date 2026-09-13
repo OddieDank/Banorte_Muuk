@@ -40,10 +40,12 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://banorte-muuk.vercel.app",   # tu URL de Vercel
-        "https://godmuuk.tech",             # tu dominio (ajusta al real)
-        "https://www.godmuuk.tech",         # si vas a usar el www también
+        "https://godmuuk.tech",
+        "https://www.godmuuk.tech",
     ],
+    # Previews de Vercel (URLs por deploy, cambian siempre):
+    # https://muuk-<hash>-<team>.vercel.app
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
