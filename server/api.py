@@ -31,14 +31,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Muuk API")
+
+# Un único CORSMiddleware con todos los orígenes permitidos.
+# (Tener más de uno causaba que las peticiones POST con preflight,
+# como /login, fueran bloqueadas por el navegador en producción.)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
         "http://localhost:5173",
-        "https://banorte-muuk.vercel.app",   # deploy Vercel
-        "https://godmuuk.tech",
-        "https://www.godmuuk.tech",
+        "https://banorte-muuk.vercel.app",   # tu URL de Vercel
+        "https://godmuuk.tech",             # tu dominio (ajusta al real)
+        "https://www.godmuuk.tech",         # si vas a usar el www también
     ],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
