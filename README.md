@@ -1,43 +1,50 @@
 # Banorte × Muuk
 
-Agente de IA que **construye la interfaz** en tiempo real: Usuario → Agno (Gemini) → FastMCP → **A2UI v0.9 oficial sobre AG-UI** → Tiger Data (Timescale Cloud). Render: `@copilotkit/a2ui-renderer` (React), catálogo BYOC con Zod.
+Agente de IA que **genera la interfaz en tiempo real**: el usuario pregunta en lenguaje natural, el modelo decide qué componentes renderizar (gráficas, tablas, planes de pago, retos) y el frontend los pinta desde el catálogo declarado por el equipo. Nada de respuestas de solo-texto.
 
-## Cómo correrlo (desde cero)
+**Pipeline:** Usuario → Agno (Gemini) → FastMCP → ops A2UI v0.9 → AG-UI events → React renderer → Tiger Data (Timescale Cloud).
 
-### 1. Clonar y backend
+## Tecnologías reales
+
+| Capa | Tech |
+|---|---|
+| Modelo | Gemini via `agno` |
+| Tools | `fastmcp` (MCP) |
+| Backend | FastAPI + uvicorn, `ag-ui-protocol` (AG-UI events), `ag-ui-a2ui-toolkit` (ops A2UI) |
+| Frontend | React 19 + Vite, `@ag-ui/client` transporte, `@copilotkit/a2ui-renderer` (render oficial a2ui), Zod |
+| DB | Tiger Data (Timescale Cloud) via `psycopg2` |
+| Voz | ElevenLabs (TTS/STT) opcional |
+
+## Arquitectura (resumen)
+
+- `server/agent.py` — Agno + Gemini + MCP tools; el prompt restringe componentes al catálogo.
+- `server/catalog.py` — validación fail-closed del agente (anti UI-injection).
+- `server/a2ui_stream.py` — componentes validados → ops v0.9 (`createSurface`/`updateComponents`/`updateDataModel`) envueltas en eventos AG-UI (`ACTIVITY_SNAPSHOT`, `TEXT`, `CUSTOM`).
+- `server/api.py` — `POST /chat` = stream AG-UI SSE; `POST /action` = acciones del usuario (única ruta que escribe en DB).
+- `server/mcp_server.py` — tools FastMCP (lectura de agregados; `aplicar_plan` y `registrar_interaccion` también expuestas por compat).
+- `server/db.py` — Tiger Data; el agente solo ve agregados (`transaccion_resumen`), detalle crudo va directo al frontend por GET.
+- `frontend/src/muuk/MuukChat.jsx` — parsea AG-UI SSE, alimenta `useA2UI().processMessages(ops)`, renderiza `<A2UIRenderer>`.
+- `frontend/src/lib/a2ui/muukCatalog.jsx` — catálogo declarado: definiciones Zod + renderers que delegan a los componentes de `src/components/`.
+- `frontend/src/components/*.tsx` — 10 componentes renderizables (PlanDePago, TablaGastos, Confirmacion, GraficaPastel/Barras/Linea, TarjetaMetrica, ProgresoMeta, ComandoUI, RetoFinanciero).
+- `frontend/src/lib/api.js` — `API_URL` única con fallback localhost.
+
+## Cómo correrlo
+
+### 1. Backend
 
 ```bash
-git clone https://github.com/OddieDank/Banorte_Muuk.git
-cd Banorte_Muuk/server
-
+cd server
 python3 -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -r requirements.txt
-
-cp .env.example .env
-```
-
-Edita `server/.env` con estos tres valores (pídele al equipo la API key y la URL de la DB, o copia el `.env` de alguien del equipo):
-
-```
-GEMINI_API_KEY=<key de AI Studio, empieza con AIza>
-GEMINI_MODEL=gemini-3.5-flash-lite
-DATABASE_URL=postgresql://...tsdb.cloud.timescale.com...?sslmode=require
-```
-
-> `GEMINI_MODEL` importa: `gemini-2.5-flash` está bloqueado para cuentas nuevas
-> y `gemini-3.6-flash` tiene límite gratis de 20 requests/día. El lite aguanta la demo.
-
-Levanta el backend:
-
-```bash
+cp .env.example .env   # GEMINI_API_KEY, GEMINI_MODEL, DATABASE_URL
 uvicorn api:app --port 8000
 ```
 
-### 2. Frontend (otra terminal)
+### 2. Frontend
 
 ```bash
-cd Banorte_Muuk/frontend
+cd frontend
 npm install
 cp .env.example .env   # VITE_API_URL=http://localhost:8000
 npm run dev            # http://localhost:5173
@@ -45,33 +52,22 @@ npm run dev            # http://localhost:5173
 
 ### 3. Probar
 
-1. Abre http://localhost:5173 → login con cualquier nombre (demo, sin auth real).
-2. En la barra de búsqueda pregunta, por ejemplo:
-   - `quiero pagar la deuda de mi tarjeta` → aparece **PlanDePago** con opciones reales
-   - `¿en qué gasto más?` → aparece **TablaGastos** con tus categorías
-   - `¿cuál es mi saldo?` → tus productos
-3. El botón **Aplicar plan** del PlanDePago pega a `POST /action` y persiste en la DB (tabla `plan_pago`).
+1. Login con cualquier nombre (demo, sin auth real).
+2. Preguntas útiles: `¿en qué gasto más?` → gráficas reales de DB; `quiero pagar mi tarjeta` → PlanDePago; `¿mis retos?` → gamificación.
+3. `Aplicar plan` y `Aceptar reto` son las únicas rutas de escritura y pasan por `/action`.
 
-### Troubleshooting
+## Validación antes de push
 
-| Síntoma | Causa | Fix |
-|---|---|---|
-| `DATABASE_URL no está definida` | falta en `.env` | ver paso 1 |
-| 401 de Gemini | key inválida u OAuth token | genera una en https://aistudio.google.com/apikey |
-| 404 "model no longer available" | modelo viejo en `.env` | `GEMINI_MODEL=gemini-3.5-flash-lite` |
-| 429 RESOURCE_EXHAUSTED | cuota diaria free | espera o habilita billing |
-| 503 UNAVAILABLE | saturación temporal de Google | reintenta en unos segundos |
-| CORS en el navegador | front en puerto ≠5173 | agregar origen en `server/api.py` |
+```bash
+cd server && .venv/bin/python validate_a2ui.py   # 5/5 fixtures
+```
 
-## Arquitectura (resumen)
+## Deploy (Vercel + backend)
 
-- `server/catalog.py` — únicos componentes que el agente puede renderizar (fail-closed, anti UI-injection); el frontend espeja el catálogo con Zod.
-- `server/a2ui_stream.py` — componentes validados → ops A2UI v0.9 oficiales (`createSurface`/`updateComponents`/`updateDataModel`) envueltas en eventos AG-UI (`ACTIVITY_SNAPSHOT` a2ui-surface + TEXT/CUSTOM).
-- `server/mcp_server.py` — tools FastMCP; solo `aplicar_plan` escribe y requiere confirmación.
-- `server/agent.py` — Agno + Gemini; ruteo de intención por keywords + JSON parse robusto.
-- `server/db.py` — Tiger Data (PG-only); privacidad: el agente solo ve agregados (`transaccion_resumen`), el detalle crudo va directo al frontend por `GET /transacciones`.
-- `frontend/src/muuk/MuukChat.jsx` — stream AG-UI → `useA2UI().processMessages()` → `<A2UIRenderer>`; onAction → `POST /action`.
-- `frontend/src/lib/a2ui/muukCatalog.jsx` — catálogo oficial: definiciones Zod + renderers (BYOC) vía `@copilotkit/a2ui-renderer`, id `muuk-catalog`.
-- `frontend/src/lib/registry.jsx` — registry interno al que delegan los renderers (los 10 componentes de `src/components/`), con tooltip `info`.
+- Front: cualquier platform que corra `npm run build` en `frontend/`. `VITE_API_URL` apunta al backend.
+- Back: servir uvicorn con las env reales. Ojo: sin redeploy del back el front nuevo no habla A2UI.
+- Ambos compañeros y A2UI coexisten porque el merge ya está cerrado en `main`.
 
-Chequeo antes de push: `cd server && .venv/bin/python validate_a2ui.py` (5/5).
+## Chequeo rápido del pipeline A2UI
+
+`AG-UI`: eventos `RUN_STARTED → ACTIVITY_SNAPSHOT (a2ui-surface) → CUSTOM → RUN_FINISHED` con `a2ui_operations` listas. El renderer copilotkit las valida contra el catálogo `muuk-catalog` (BYOC) y dibuja; "catálogo desconocido" es inmediato, no una tarjeta vacía.
