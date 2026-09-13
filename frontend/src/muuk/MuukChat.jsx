@@ -6,7 +6,11 @@ import { renderComponent } from "../a2ui/registry";
 import "../components/PlanDePago";
 import "../components/TablaGastos";
 import "../components/Confirmacion";
+import "../components/GraficaPastel";
+import "../components/GraficaBarras";
+import "../components/TarjetaMetrica";
 import "../components/PlanDePago.css";
+import "../components/Graficas.css";
 import "./MuukChat.css";
 
 const API = "http://localhost:8000";
@@ -85,7 +89,7 @@ function MuukChat({ consulta }) {
         <section className="muuk-chat">
             {bloques.map((b, i) =>
                 b.tipo === "surface" ? (
-                    <div key={i}>
+                    <div key={i} className="muuk-surface">
                         {b.surface.components.map((c) => (
                             <div key={c.componentId}>{renderComponent(c, dispatch)}</div>
                         ))}

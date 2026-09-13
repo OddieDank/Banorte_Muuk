@@ -1,22 +1,48 @@
-// PlanDePago — componente accionable genérico. Sin dependencia de UI lib.
+// PlanDePago — opciones de reestructura seleccionables + CTA único.
+// El dispatch lleva la opción elegida + monto_original (escritura real en BD).
+import { useState } from "react";
 import { register } from "../a2ui/registry";
 import type { OneOffAction } from "../a2ui/types";
 
-interface Opcion { meses: number; pago_mensual: number; cat: number; }
+interface Opcion { meses: number; pago_mensual: number; cat: number; total?: number; }
 
 register("PlanDePago", ({ props, dispatch }: { props: Record<string, unknown>; dispatch: (a: OneOffAction) => void }) => {
   const opciones = (props.opciones as Opcion[]) || [];
+  const monto = Number(props.monto_original ?? 0);
+  const [sel, setSel] = useState(0);
+  const op = opciones[sel];
+
   return (
     <div className="muuk-plan">
       <h3 className="muuk-title">{String(props.mensaje ?? "Plan de pago")}</h3>
-      {opciones.map((o, i) => (
-        <div key={i} className="muuk-opcion">
-          <span>Mensual: <b>{formato(o.pago_mensual)}</b> | {o.meses} meses · CAT {o.cat}%</span>
-          <button onClick={() =>
-            dispatch({ sessionId: "", componente: "PlanDePago", evento: "aplicar_plan", payload: o as any })
-          }>{String(props.cta || "Aplicar plan")}</button>
-        </div>
-      ))}
+      {monto > 0 && <p className="muuk-saldo">Saldo a reestructurar: <b>{formato(monto)}</b></p>}
+
+      <div className="muuk-opciones">
+        {opciones.map((o, i) => (
+          <button
+            key={i}
+            type="button"
+            className={`muuk-opcion-card${i === sel ? " seleccionada" : ""}`}
+            onClick={() => setSel(i)}
+          >
+            <span className="muuk-opcion-meses">{o.meses} meses</span>
+            <span className="muuk-opcion-pago">{formato(o.pago_mensual)}<small>/mes</small></span>
+            <span className="muuk-opcion-cat">CAT {o.cat}%{o.total ? ` · total ${formato(o.total)}` : ""}</span>
+          </button>
+        ))}
+      </div>
+
+      {op && (
+        <button
+          className="muuk-cta"
+          onClick={() =>
+            dispatch({ sessionId: "", componente: "PlanDePago", evento: "aplicar_plan",
+              payload: { ...op, monto_original: monto } as any })
+          }
+        >
+          {String(props.cta || "Aplicar plan")} · {op.meses} meses
+        </button>
+      )}
     </div>
   );
 });

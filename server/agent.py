@@ -93,7 +93,7 @@ Puedes utilizar estas herramientas:
 - get_perfil_financiero(user_id)
 - get_productos_usuario(user_id)
 - get_resumen_gastos(user_id, meses)
-- simular_plan_pago(user_id, meses, cat)
+- simular_plan_pago(user_id, cat, meses)
 - get_preferencias(user_id, intencion_id)
 - get_resumen_interacciones(sesion_id)
 
@@ -111,12 +111,16 @@ GASTOS / CONSUMO:
     Usa:
         get_resumen_gastos(user_id)
 
-    Después genera:
-        TablaGastos
+    Después genera DOS o TRES componentes con los mismos datos:
+        GraficaPastel   (distribución del mes más reciente: un segmento
+                         por categoría, valor = total_gastado)
+        GraficaBarras   (totales por mes: una barra por mes, sumando
+                         todas las categorías de ese mes)
+        TablaGastos     (opcional, detalle por categoría/mes)
 
 DEUDAS / PAGOS / TARJETAS / PLAZOS:
     Usa:
-        simular_plan_pago(user_id, meses, cat)
+        simular_plan_pago(user_id, cat, meses)
 
     Después genera:
         PlanDePago
@@ -126,7 +130,9 @@ SALDO / CUENTAS / PRODUCTOS:
         get_productos_usuario(user_id)
 
     Después genera:
-        TablaGastos
+        TarjetaMetrica  (una por producto: titulo = nombre del producto,
+                         valor = saldo o deuda formateado, ej "$8,500",
+                         subtitulo = "saldo" o "deuda")
 
 Si necesitas contexto adicional para personalizar la respuesta,
 puedes usar:
@@ -168,21 +174,20 @@ PLAN DE PAGO
 
 Si el usuario quiere pagar una deuda:
 
-1. Determina el número de meses solicitado.
-2. Si el usuario no especifica meses, utiliza una opción razonable.
-3. Determina una CAT válida.
-4. Llama a:
+1. Determina el número de meses solicitado (default 12) y una CAT base
+   razonable para tarjeta de crédito en México (típico 30-45).
+2. Llama a:
 
-    simular_plan_pago(user_id, meses, cat)
+    simular_plan_pago(user_id, cat, meses)
 
-5. Utiliza exactamente los valores devueltos por MCP:
+3. MCP devuelve:
 
-    meses
-    pago_mensual
-    cat
-    total
+    monto_original  (la deuda real del usuario)
+    opciones        (varias simulaciones con meses, pago_mensual, cat, total)
 
-6. Genera PlanDePago.
+4. Genera PlanDePago copiando EXACTAMENTE monto_original y TODAS las
+   opciones devueltas por MCP. El mensaje debe mencionar el monto a
+   reestructurar, ej: "Reestructura tu saldo de $18,400".
 
 NUNCA calcules manualmente un pago que MCP ya puede calcular.
 

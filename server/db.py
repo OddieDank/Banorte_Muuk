@@ -147,11 +147,14 @@ def resolve_componente(nombre: str) -> str | None:
 
 
 def seed_componente_ui():
-    """Inserta las 3 componentes del catálogo si no existen ya."""
+    """Inserta las componentes del catálogo si no existen ya."""
     for nombre, tipo, desc in [
         ("PlanDePago", "financiero", "Opciones de reestructura de deuda con CTA"),
         ("TablaGastos", "financiero", "Tabla de gastos/agregados por categoría"),
         ("Confirmacion", "ui", "Confirmación de acción del usuario"),
+        ("GraficaPastel", "visualizacion", "Distribución por categoría (donut, rebanadas clicables)"),
+        ("GraficaBarras", "visualizacion", "Serie por periodo (barras clicables)"),
+        ("TarjetaMetrica", "resumen", "Métrica destacada con valor grande"),
     ]:
         if not _q1("SELECT 1 FROM componente_ui WHERE nombre = %s", (nombre,)):
             _q("INSERT INTO componente_ui (nombre, tipo, descripcion) VALUES (%s, %s, %s)", (nombre, tipo, desc))

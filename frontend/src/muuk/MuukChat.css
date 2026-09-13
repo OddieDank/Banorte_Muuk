@@ -4,8 +4,16 @@
     flex-direction: column;
     gap: 16px;
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
     margin-top: 24px;
+}
+
+/* Dashboard: los componentes de una respuesta se acomodan en grid */
+.muuk-surface {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    align-items: stretch;
 }
 
 .muuk-user {

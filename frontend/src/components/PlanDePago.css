@@ -22,62 +22,143 @@
 }
 
 
-.muuk-opcion {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 24px;
-
-    padding: 18px 0;
-
-    border-top: 1px solid #e2e2e2;
-}
-
-
-.muuk-opcion span {
+.muuk-saldo {
+    margin: -12px 0 20px;
     font-size: 15px;
-
     color: #444444;
 }
 
-
-.muuk-opcion b {
-    color: #292929;
+.muuk-saldo b {
+    color: #b5121b;
 }
 
 
-.muuk-opcion button {
-    padding: 11px 20px;
+/* ── Opciones seleccionables (PlanDePago) ─────────────────────────────── */
+
+.muuk-opciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.muuk-opcion-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+
+    padding: 16px;
+
+    border: 2px solid #e2e2e2;
+    border-radius: 8px;
+    background: #ffffff;
+
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.muuk-opcion-card:hover {
+    border-color: #b5121b;
+}
+
+.muuk-opcion-card.seleccionada {
+    border-color: #b5121b;
+    box-shadow: 0 0 0 3px rgba(181, 18, 27, 0.12);
+}
+
+.muuk-opcion-meses {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #777777;
+}
+
+.muuk-opcion-pago {
+    font-size: 20px;
+    font-weight: 700;
+    color: #292929;
+}
+
+.muuk-opcion-pago small {
+    font-size: 13px;
+    font-weight: 400;
+    color: #777777;
+}
+
+.muuk-opcion-cat {
+    font-size: 13px;
+    color: #555555;
+}
+
+.muuk-cta {
+    width: 100%;
+    padding: 13px 20px;
 
     border: none;
-    border-radius: 3px;
+    border-radius: 4px;
 
     background-color: #b5121b;
     color: #ffffff;
 
     font-family: inherit;
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 600;
 
     cursor: pointer;
-
     transition: background-color 0.2s ease;
 }
 
-
-.muuk-opcion button:hover {
+.muuk-cta:hover {
     background-color: #8f0e16;
 }
 
 
-@media (max-width: 600px) {
-    .muuk-opcion {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+/* ── Filas con barra (TablaGastos) ────────────────────────────────────── */
 
-    .muuk-opcion button {
-        width: 100%;
-    }
+.muuk-fila {
+    padding: 10px 0;
+    border-top: 1px solid #f0f0f0;
+}
+
+.muuk-fila-info {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    font-size: 14px;
+    color: #444444;
+}
+
+.muuk-fila-info b {
+    color: #292929;
+    white-space: nowrap;
+}
+
+.muuk-barra {
+    height: 5px;
+    margin-top: 6px;
+    border-radius: 3px;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+.muuk-barra-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: #b5121b;
+}
+
+.muuk-total {
+    margin-top: 8px;
+    border-top: 2px solid #292929;
+}
+
+.muuk-total .muuk-fila-info {
+    font-size: 15px;
+    font-weight: 600;
+    color: #292929;
 }

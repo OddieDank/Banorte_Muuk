@@ -16,9 +16,11 @@ class OpcionPago(BaseModel):
     meses: int = Field(gt=0, le=360)
     pago_mensual: float = Field(gt=0)
     cat: float = Field(gt=0, le=1000)
+    total: Optional[float] = None
 
 class PlanDePago(BaseModel):
     mensaje: str
+    monto_original: float = Field(gt=0)
     opciones: list[OpcionPago]
     cta: str = "Aplicar plan"
 
@@ -38,11 +40,35 @@ class Confirmacion(BaseModel):
     mensaje: str
     detalles: Optional[dict] = None
 
+class Segmento(BaseModel):
+    etiqueta: str
+    valor: float = Field(gt=0)
+
+class GraficaPastel(BaseModel):
+    titulo: str
+    segmentos: list[Segmento]
+
+class Barra(BaseModel):
+    etiqueta: str
+    valor: float = Field(gt=0)
+
+class GraficaBarras(BaseModel):
+    titulo: str
+    barras: list[Barra]
+
+class TarjetaMetrica(BaseModel):
+    titulo: str
+    valor: str  # ya formateado: "$8,500" o "+18.4%"
+    subtitulo: Optional[str] = None
+
 # Catálogo: type → schema de props. Cualquier otro type se rechaza.
 CATALOG: dict[str, type[BaseModel]] = {
     "PlanDePago": PlanDePago,
     "TablaGastos": TablaGastos,
     "Confirmacion": Confirmacion,
+    "GraficaPastel": GraficaPastel,
+    "GraficaBarras": GraficaBarras,
+    "TarjetaMetrica": TarjetaMetrica,
 }
 
 
