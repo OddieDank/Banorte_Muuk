@@ -1,6 +1,6 @@
 // TarjetaMetrica — número grande tipo dashboard. Clic registra interés en la métrica.
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 register("TarjetaMetrica", ({ props, dispatch }: { props: Record<string, unknown>; dispatch: (a: OneOffAction) => void }) => (
   <div

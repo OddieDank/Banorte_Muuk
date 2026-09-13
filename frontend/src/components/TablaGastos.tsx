@@ -1,7 +1,7 @@
 // TablaGastos — filas con barra proporcional + total. Vista o dataRef remoto
 // (privacidad: el LLM nunca ve transacciones crudas; el frontend las trae del API).
 import { useEffect, useState } from "react";
-import { register } from "../a2ui/registry";
+import { register } from "../lib/registry";
 
 interface Fila { concepto: string; monto: number; categoria: string; }
 

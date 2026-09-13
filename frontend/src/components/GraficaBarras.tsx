@@ -1,8 +1,8 @@
 // GraficaBarras — barras verticales CSS. Cada barra es clicable:
 // dispatch("ver_periodo") → /action → interaction_log.
 import { useState } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 interface Barra { etiqueta: string; valor: number; }
 

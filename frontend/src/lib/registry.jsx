@@ -1,12 +1,9 @@
 // Registro componente-type → componente React. Único lugar que conoce el catálogo.
 // Los renderers son COMPONENTES (se montan con <R/>): pueden usar hooks.
-import type { OneOffAction, ComponentSpec } from "./types";
-
-type Renderer = (args: { props: Record<string, unknown>; dispatch: (a: OneOffAction) => void }) => JSX.Element;
-
-const RENDERERS: Record<string, Renderer> = {};
-export function register(type: string, r: Renderer) { RENDERERS[type] = r; }
-export function renderComponent(spec: ComponentSpec, dispatch: (a: OneOffAction) => void) {
+// (Movido de src/a2ui — el subset propio se sustituyó por @copilotkit/a2ui-renderer.)
+const RENDERERS = {};
+export function register(type, r) { RENDERERS[type] = r; }
+export function renderComponent(spec, dispatch) {
   const R = RENDERERS[spec.componentType];
   if (!R) return <span>{'componente desconocido: ' + spec.componentType}</span>;
   // Tarjeta de info universal: cualquier componente del catálogo puede traer

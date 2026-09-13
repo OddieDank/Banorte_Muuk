@@ -1,5 +1,5 @@
 """
-Muuk — Agente A2UI sobre MCP.
+Muuk — Agente A2UI sobre AG-UI y MCP.
 
 Flujo:
 
@@ -13,7 +13,7 @@ Flujo:
        ↓
     Gemini
        ↓
-    JSON A2UI
+    JSON (componentes) → a2ui_stream → AG-UI/A2UI v0.9
        ↓
     api.py
 

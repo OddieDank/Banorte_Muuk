@@ -1,8 +1,8 @@
 // GraficaLinea — tendencia por periodo en SVG propio, sin librerías.
 // Puntos y etiquetas clicables: dispatch("ver_punto") → /action (memoria adaptativa).
 import { useState } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 interface Punto { etiqueta: string; valor: number; }
 

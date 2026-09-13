@@ -1,8 +1,8 @@
 // PlanDePago — opciones de reestructura seleccionables + CTA único.
 // El dispatch lleva la opción elegida + monto_original (escritura real en BD).
 import { useState } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 interface Opcion { meses: number; pago_mensual: number; cat: number; total?: number; }
 

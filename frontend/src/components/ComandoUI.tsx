@@ -1,8 +1,8 @@
 // ComandoUI — comandos de la propia interfaz (modo oscuro, exportar PDF).
 // El frontend los ejecuta localmente y registra la interacción igual.
 import { useEffect } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 const ACCIONES: Record<string, { label: string; run: () => void }> = {
   modo_oscuro: { label: "Modo oscuro", run: () => document.body.classList.toggle("muuk-dark") },
