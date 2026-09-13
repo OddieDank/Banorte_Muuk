@@ -60,9 +60,6 @@ def _q1(sql: str, params: tuple = ()) -> dict | None:
 def get_usuario(user_id: str) -> dict | None:
     return _q1("SELECT * FROM usuario WHERE user_id = %s", (user_id,))
 
-def get_usuario(user_id: str) -> dict | None:
-    return _q1("SELECT * FROM usuario WHERE user_id = %s", (user_id,))
-
 def validar_login(nombre: str, password: str) -> dict | None:
     """Login real por usuario: nombre (completo o primer nombre) + password.
     Devuelve {user_id, nombre} si las credenciales son válidas, None si no."""
@@ -269,3 +266,225 @@ def simular_plan_pago(deuda: float, meses: int, cat: float) -> dict:
 # ── Inicialización ────────────────────────────────────────────────────────
 
 seed_componente_ui()
+
+# ── MUUK Coins ─────────────────────────────────────────────────────────────
+
+def get_muuk_wallet(user_id: str) -> dict | None:
+    """Obtiene el saldo actual de Muuk Coins del usuario."""
+    return _q1(
+        """
+        SELECT user_id, muuk_coins, updated_at
+        FROM muuk_wallet
+        WHERE user_id = %s
+        """,
+        (user_id,)
+    )
+
+
+def get_muuk_coin_history(user_id: str, limit: int = 20) -> list[dict]:
+    """Obtiene el historial de movimientos de Muuk Coins."""
+    limit = min(max(limit, 1), 100)
+
+    return _q(
+        """
+        SELECT
+            muuk_coin_transaction_id,
+            fecha,
+            cantidad,
+            tipo,
+            descripcion
+        FROM muuk_coin_transaction
+        WHERE user_id = %s
+        ORDER BY fecha DESC
+        LIMIT %s
+        """,
+        (user_id, limit)
+    )
+
+
+def get_retos_disponibles(user_id: str) -> list[dict]:
+    """Obtiene retos activos que el usuario aún no ha completado."""
+    return _q(
+        """
+        SELECT
+            r.reto_id,
+            r.nombre,
+            r.descripcion,
+            r.recompensa,
+            r.condicion_tipo,
+            r.condicion_valor,
+            r.condicion_categoria
+        FROM reto r
+        WHERE r.activo = TRUE
+          AND NOT EXISTS (
+              SELECT 1
+              FROM usuario_reto ur
+              WHERE ur.user_id = %s
+                AND ur.reto_id = r.reto_id
+          )
+        ORDER BY r.recompensa DESC
+        """,
+        (user_id,)
+    )
+
+# IM SORRY ITS SO LOOONG :(
+def validar_y_completar_reto(user_id: str, reto_id: str) -> dict:
+    """
+    Valida si el usuario cumple el reto.
+    Si lo cumple, llama a completar_reto() y otorga las coins.
+    """
+
+    reto = _q1(
+        """
+        SELECT
+            reto_id,
+            nombre,
+            recompensa,
+            condicion_tipo,
+            condicion_valor,
+            condicion_categoria
+        FROM reto
+        WHERE reto_id = %s
+          AND activo = TRUE
+        """,
+        (reto_id,)
+    )
+
+    if not reto:
+        return {
+            "ok": False,
+            "status": "not_found",
+            "message": "El reto no existe o está inactivo."
+        }
+
+    # ---------------------------------------------------------
+    # Evitar completar el mismo reto dos veces
+    # ---------------------------------------------------------
+
+    completado = _q1(
+        """
+        SELECT 1
+        FROM usuario_reto
+        WHERE user_id = %s
+          AND reto_id = %s
+        """,
+        (user_id, reto_id)
+    )
+
+    if completado:
+        return {
+            "ok": False,
+            "status": "already_completed",
+            "message": "Este reto ya fue completado."
+        }
+
+    cumple = False
+
+    # ---------------------------------------------------------
+    # RETO: AHORRO MENSUAL
+    # ---------------------------------------------------------
+
+    if reto["condicion_tipo"] == "ahorro_mensual":
+
+        resultado = _q1(
+            """
+            SELECT
+                COALESCE(SUM(total_ingresos), 0)
+                -
+                COALESCE(SUM(total_gastado), 0)
+                AS ahorro
+            FROM transaccion_resumen r
+            JOIN usuario_producto up
+                ON up.user_product_id = r.user_product_id
+            WHERE up.user_id = %s
+              AND r.mes = date_trunc('month', now())
+            """,
+            (user_id,)
+        )
+
+        ahorro = float(resultado["ahorro"] or 0)
+
+        cumple = ahorro >= float(reto["condicion_valor"])
+
+    # ---------------------------------------------------------
+    # RETO: REDUCCIÓN DE CATEGORÍA
+    # ---------------------------------------------------------
+
+    elif reto["condicion_tipo"] == "reduccion_categoria":
+
+        resultado = _q1(
+            """
+            WITH meses AS (
+                SELECT
+                    r.mes,
+                    SUM(r.total_gastado) AS gasto
+                FROM transaccion_resumen r
+                JOIN usuario_producto up
+                    ON up.user_product_id = r.user_product_id
+                WHERE up.user_id = %s
+                  AND r.categoria = %s
+                  AND r.mes >= date_trunc('month', now()) - INTERVAL '1 month'
+                GROUP BY r.mes
+                ORDER BY r.mes DESC
+                LIMIT 2
+            )
+            SELECT
+                MAX(CASE
+                    WHEN mes = date_trunc('month', now())
+                    THEN gasto
+                END) AS actual,
+
+                MAX(CASE
+                    WHEN mes = date_trunc('month', now()) - INTERVAL '1 month'
+                    THEN gasto
+                END) AS anterior
+            FROM meses
+            """,
+            (
+                user_id,
+                reto["condicion_categoria"]
+            )
+        )
+
+        actual = float(resultado["actual"] or 0)
+        anterior = float(resultado["anterior"] or 0)
+
+        if anterior > 0:
+            reduccion = ((anterior - actual) / anterior) * 100
+            cumple = reduccion >= float(reto["condicion_valor"])
+
+    # ---------------------------------------------------------
+    # SI CUMPLE → otorgar coins
+    # ---------------------------------------------------------
+
+    if cumple:
+
+        recompensa = _q1(
+            """
+            SELECT completar_reto(%s, %s) AS recompensa
+            """,
+            (user_id, reto_id)
+        )
+
+        coins = recompensa["recompensa"]
+
+        wallet = get_muuk_wallet(user_id)
+
+        return {
+            "ok": True,
+            "status": "completed",
+            "reto_id": reto_id,
+            "reto": reto["nombre"],
+            "coins_earned": coins,
+            "balance": wallet["muuk_coins"] if wallet else 0,
+            "message": f"¡Reto completado! Ganaste {coins} Muuk Coins."
+        }
+
+    return {
+        "ok": True,
+        "status": "not_completed",
+        "reto_id": reto_id,
+        "reto": reto["nombre"],
+        "coins_earned": 0,
+        "message": "Todavía no cumples la condición de este reto."
+    }

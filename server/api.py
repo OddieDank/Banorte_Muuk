@@ -166,6 +166,16 @@ def action(req: ActionRequest, request: Request):
         )
         return {"ok": True, "plan": result}
 
+    if req.evento == "aceptar_reto":
+        reto_id = req.payload.get("reto_id")
+
+        if not reto_id:
+            raise HTTPException(status_code=400, detail="reto_id requerido")
+
+        result = db.validar_y_completar_reto(req.user_id, reto_id)
+
+        return result
+
     return {"ok": True}
 
 
@@ -192,6 +202,49 @@ def tts(req: TTSRequest, request: Request):
     audio = voice.synthesize_speech(req.text)  # antes decía req.texto
     return StreamingResponse(iter([audio]), media_type="audio/mpeg")
 
+@app.get("/muuk-coins")
+def muuk_coins(request: Request, user_id: str = DEFAULT_USER):
+    """Devuelve el saldo actual de Muuk Coins."""
+    _check_rate(request.client.host if request.client else "demo")
+
+    wallet = db.get_muuk_wallet(user_id)
+
+    return {
+        "user_id": user_id,
+        "balance": wallet["muuk_coins"] if wallet else 0
+    }
+
+
+@app.get("/muuk-coins/history")
+def muuk_coins_history(
+    request: Request,
+    user_id: str = DEFAULT_USER,
+    limit: int = 20
+):
+    """Devuelve el historial de Muuk Coins."""
+    _check_rate(request.client.host if request.client else "demo")
+
+    wallet = db.get_muuk_wallet(user_id)
+    history = db.get_muuk_coin_history(user_id, limit)
+
+    return {
+        "user_id": user_id,
+        "balance": wallet["muuk_coins"] if wallet else 0,
+        "history": history
+    }
+
+
+@app.get("/challenges")
+def challenges(request: Request, user_id: str = DEFAULT_USER):
+    """Devuelve los retos activos que el usuario aún no ha completado."""
+    _check_rate(request.client.host if request.client else "demo")
+
+    return {
+        "user_id": user_id,
+        "challenges": db.get_retos_disponibles(user_id)
+    }
+
+
 @app.post("/stt")
 async def stt(request: Request, file: UploadFile = File(...)):
     _check_rate(request.client.host if request.client else "demo")
@@ -199,12 +252,15 @@ async def stt(request: Request, file: UploadFile = File(...)):
     texto = voice.transcribe_speech(audio_bytes)
     return {"text": texto}
 
+
 @app.get("/perfil")
 def perfil(request: Request, user_id: str = DEFAULT_USER):
     _check_rate(request.client.host if request.client else "demo")
     usuario = db.get_usuario(user_id)
+
     if not usuario:
         raise HTTPException(404, "usuario no encontrado")
+
     return {
         "usuario": usuario,
         "perfil_financiero": db.get_perfil_financiero(user_id),

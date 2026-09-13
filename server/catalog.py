@@ -83,6 +83,13 @@ class ProgresoMeta(InfoMixin):
     actual: float = Field(ge=0)
     meta: float = Field(gt=0)
 
+class RetoFinanciero(InfoMixin):
+    reto_id: str
+    titulo: str
+    descripcion: str
+    recompensa: int
+    cta: str = "Aceptar reto"
+
 class ComandoUI(BaseModel):
     """Comandos de interfaz: el frontend los ejecuta localmente (modo oscuro,
     exportar PDF). El dispatch igual se registra para aprendizaje."""
@@ -100,6 +107,7 @@ CATALOG: dict[str, type[BaseModel]] = {
     "TarjetaMetrica": TarjetaMetrica,
     "ProgresoMeta": ProgresoMeta,
     "ComandoUI": ComandoUI,
+    "RetoFinanciero": RetoFinanciero,
 }
 
 
@@ -118,3 +126,4 @@ def validar_componente(componentType: str, props: dict) -> bool:
 def new_message(bucket: str, **payload) -> dict:
     """Envoltura simple para SSE; el adapter del frontend para un único mensaje."""
     return {"type": bucket, **payload}
+
