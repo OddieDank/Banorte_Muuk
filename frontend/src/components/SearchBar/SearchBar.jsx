@@ -32,8 +32,7 @@ function SearchBar({ onSearch }) {
         if (onSearch) {
             onSearch(texto);
         }
-
-        setQuery("");
+        setQuery(""); // limpia la barra al enviar
     };
 
     const handleKeyDown = (event) => {

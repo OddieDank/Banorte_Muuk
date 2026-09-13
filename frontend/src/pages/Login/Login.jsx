@@ -21,26 +21,25 @@ function Login({ onLogin }) {
         setCargando(true);
 
         try {
-            const respuesta = await fetch("http://localhost:8000/usuarios");
+            const respuesta = await fetch("http://localhost:8000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nombre: username.trim(),
+                    password: password,
+                }),
+            });
+
+            if (respuesta.status === 401) {
+                setError("Usuario o contraseña incorrectos.");
+                return;
+            }
             if (!respuesta.ok) {
                 setError("No se pudo conectar con el servidor.");
                 return;
             }
 
-            const usuarios = await respuesta.json();
-            const buscado = username.trim().toLowerCase();
-
-            // Coincide con el nombre completo o solo el primer nombre
-            const encontrado = usuarios.find((u) => {
-                const nombreCompleto = u.nombre.toLowerCase();
-                const primerNombre = nombreCompleto.split(" ")[0];
-                return nombreCompleto === buscado || primerNombre === buscado;
-            });
-
-            if (!encontrado) {
-                setError("Usuario no encontrado. Prueba con Ana, Roberto o Marisol.");
-                return;
-            }
+            const encontrado = await respuesta.json();
 
             localStorage.setItem("user_id", encontrado.user_id);
             localStorage.setItem("username", encontrado.nombre);

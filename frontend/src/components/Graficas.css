@@ -1,0 +1,222 @@
+/* Gráficas propias (donut + barras) y tarjeta de métrica — sin librerías. */
+
+.muuk-chart {
+    min-width: 0;
+}
+
+/* ── Donut ────────────────────────────────────────────────────────────── */
+
+.muuk-donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.muuk-donut {
+    width: 160px;
+    height: 160px;
+    flex-shrink: 0;
+}
+
+.muuk-donut-total {
+    font-size: 6px;
+    font-weight: 700;
+    fill: #292929;
+}
+
+.muuk-donut-label {
+    font-size: 3.2px;
+    fill: #777777;
+    text-transform: capitalize;
+}
+
+.muuk-leyenda {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex: 1;
+    min-width: 140px;
+}
+
+.muuk-leyenda li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #444444;
+    cursor: pointer;
+}
+
+.muuk-leyenda li:hover,
+.muuk-leyenda li.activa {
+    background: #f5f5f5;
+}
+
+.muuk-leyenda li b {
+    margin-left: auto;
+    color: #292929;
+}
+
+.muuk-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── Barras ───────────────────────────────────────────────────────────── */
+
+.muuk-barras {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    height: 180px;
+    padding-top: 20px;
+}
+
+.muuk-barra-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    height: 100%;
+
+    border: none;
+    background: none;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0;
+}
+
+.muuk-barra-valor {
+    font-size: 12px;
+    font-weight: 600;
+    color: #b5121b;
+    min-height: 15px;
+    white-space: nowrap;
+}
+
+.muuk-barra-rect {
+    width: 100%;
+    max-width: 56px;
+    border-radius: 6px 6px 0 0;
+    background: #e5a0a4;
+    transition: background 0.15s ease, height 0.3s ease;
+}
+
+.muuk-barra-col:hover .muuk-barra-rect,
+.muuk-barra-rect.activa {
+    background: #b5121b;
+}
+
+.muuk-barra-etq {
+    font-size: 12px;
+    color: #777777;
+    text-transform: capitalize;
+}
+
+/* ── Tarjeta métrica ──────────────────────────────────────────────────── */
+
+.muuk-metrica {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+    transition: box-shadow 0.15s ease;
+}
+
+.muuk-metrica:hover {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.muuk-metrica-titulo {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #777777;
+}
+
+.muuk-metrica-valor {
+    font-size: 40px;
+    font-weight: 700;
+    color: #292929;
+    line-height: 1;
+}
+
+.muuk-metrica-sub {
+    font-size: 13px;
+    color: #777777;
+}
+
+/* ── Línea (tendencia) ────────────────────────────────────────────────── */
+
+.muuk-linea {
+    width: 100%;
+}
+
+.muuk-linea-grid {
+    stroke: #f0f0f0;
+    stroke-width: 0.4;
+}
+
+.muuk-linea-path {
+    stroke: #b5121b;
+    stroke-width: 1.2;
+}
+
+.muuk-linea-pt {
+    fill: #e5a0a4;
+    transition: r 0.15s ease;
+}
+
+.muuk-linea-pt.activa {
+    fill: #b5121b;
+}
+
+.muuk-linea-val {
+    font-size: 4.5px;
+    font-weight: 600;
+    fill: #b5121b;
+}
+
+.muuk-linea-etq {
+    font-size: 4.2px;
+    fill: #777777;
+    text-transform: capitalize;
+}
+
+/* ── Progreso (meta de ahorro) ────────────────────────────────────────── */
+
+.muuk-progreso {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.muuk-progreso-cifra {
+    font-size: 32px;
+    font-weight: 700;
+    color: #3a7d44;
+    line-height: 1;
+}
+
+.muuk-progreso-pista {
+    height: 12px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+.muuk-progreso-barra {
+    height: 100%;
+    border-radius: 6px;
+    background: #3a7d44;
+    transition: width 0.4s ease;
+}

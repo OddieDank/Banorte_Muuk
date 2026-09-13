@@ -14,7 +14,6 @@ from collections import defaultdict
 import agent
 import db
 from catalog import validar_componente, new_message
-from middleware import uiPlanner
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -62,27 +61,42 @@ class TTSRequest(BaseModel):
     text:str
 
 
+class LoginRequest(BaseModel):
+    nombre: str
+    password: str
+
+
+def _perfil_ui(user_id: str) -> dict:
+    """Perfil de accesibilidad: adulto mayor → letra grande + lenguaje simple."""
+    usuario = db.get_usuario(user_id) or {}
+    edad = usuario.get("edad")
+    senior = isinstance(edad, (int, float)) and edad >= 60
+    return {"perfil": "senior" if senior else "estandar", "detalle": "simple" if senior else "extendido"}
+
+
 def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
     surface_id = f"s-{session_id}-{uuid.uuid4().hex[:6]}"
     msgs = [new_message("createSurface", surfaceId=surface_id)]
 
-    # Filtrar y ordenar componentes por preferencias del usuario
-    comp_names = [c.type for c in resp.componentes if validar_componente(c.type, c.props)]
-    preferencias = db.get_preferencias(user_id)
-    preferred = [p["componente_nombre"] for p in preferencias if p.get("componente_nombre")]
-    ordered_names = uiPlanner.prioritize_components(comp_names, preferred)
-
-    # Reordenar según preferencias
-    comp_map = {c.type: c for c in resp.componentes if validar_componente(c.type, c.props)}
-    comps = []
-    for i, name in enumerate(ordered_names):
-        if name in comp_map:
-            c = comp_map[name]
-            comps.append({"componentId": f"c{i}", "componentType": c.type, "props": c.props})
-
+    # Válidos, deduplicados por (type, props): el LLM a veces emite la misma
+    # tarjeta/gráfica N veces idéntica (respondemos una sola).
+    valid = []
+    seen = set()
     for c in resp.componentes:
         if not validar_componente(c.type, c.props):
             db.registrar_interaccion(session_id, "SYSTEM_RESPONSE", f"ui_bloqueada:{c.type}")
+            continue
+        clave = c.type + json.dumps(c.props, sort_keys=True, default=str)
+        if clave in seen:
+            continue
+        seen.add(clave)
+        valid.append(c)
+
+    # Preferencias del usuario: componentes preferidos primero (positivo)
+    preferred = [p["componente_nombre"] for p in db.get_preferencias(user_id) if p.get("componente_nombre")]
+    pos = {c: i for i, c in enumerate(preferred)}
+    valid.sort(key=lambda c: pos.get(c.type, len(pos)))
+    comps = [{"componentId": f"c{i}", "componentType": c.type, "props": c.props} for i, c in enumerate(valid)]
 
     if comps:
         msgs.append(new_message("surfaceUpdate", surfaceId=surface_id, components=comps))
@@ -93,19 +107,31 @@ def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
 
 def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
     historial = db.get_resumen_interacciones(session_id)
+    perfil = _perfil_ui(user_id)
 
     prompt = (
         f"CONTEXTO DE SESIÓN:\n"
         f"user_id={user_id}\n"
         f"session_id={session_id}\n"
+        f"perfil_ui={perfil['perfil']} (detalle={perfil['detalle']})\n"
         f"HISTORIAL: {json.dumps(historial, default=str)}\n\n"
         f"MENSAJE DEL USUARIO:\n"
         f"{mensaje}"
     )
 
-    resp = agent.run_muuk(prompt)
+    try:
+        resp = agent.run_muuk(prompt)
+    except agent._ModeloSaturado:
+        # Gemini saturado tras reintentos: mensaje amable, no 500.
+        return [
+            new_message("dataModelUpdate", path="/meta",
+                value={"texto": "El agente está ocupado justo ahora. Intenta de nuevo en unos segundos."})
+        ]
 
-    return _to_surface(session_id, resp, user_id)
+    msgs = _to_surface(session_id, resp, user_id)
+    # A2UI: el perfil llega como dataModel en la primera surface — el frontend
+    # lo aplica como clase CSS (letra grande si senior) a todo el chat.
+    return msgs + [new_message("dataModelUpdate", path="/perfil", value=perfil)]
 
 
 @app.post("/chat")
@@ -151,10 +177,14 @@ def transacciones(request: Request, user_id: str = DEFAULT_USER, limit: int = 20
     _check_rate(request.client.host if request.client else "demo")
     return db.get_transacciones(user_id, limit)
 
-@app.get("/usuarios")
-def usuarios(request: Request):
+@app.post("/login")
+def login(req: LoginRequest, request: Request):
+    """Valida credenciales por usuario contra la BD (hash SHA-256)."""
     _check_rate(request.client.host if request.client else "demo")
-    return db.get_usuarios()
+    usuario = db.validar_login(req.nombre, req.password)
+    if not usuario:
+        raise HTTPException(401, "Usuario o contraseña incorrectos")
+    return usuario
 
 @app.post("/tts")
 def tts(req: TTSRequest, request: Request):

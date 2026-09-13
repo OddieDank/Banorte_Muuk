@@ -39,13 +39,28 @@ def get_resumen_gastos(user_id: str, meses: int = 3) -> list:
 
 
 @mcp.tool
-def simular_plan_pago(user_id: str, meses: int, cat: float) -> dict:
-    """Simula reestructura de deuda (tarjeta o préstamo). Read-only."""
+def get_presupuesto_estimado(user_id: str) -> list:
+    """Semáforo de presupuesto por categoría: promedio histórico vs mes actual.
+    Read-only; estado: sobre / al_limite / bajo."""
+    return db.get_presupuesto_estimado(user_id)
+
+
+@mcp.tool
+def simular_plan_pago(user_id: str, cat: float, meses: int = 12) -> dict:
+    """Simula reestructura de deuda. Read-only.
+    Devuelve monto_original (deuda real) y varias opciones de plazo:
+    12/18/24 meses (más el plazo pedido si es distinto), CAT escalonado."""
     productos = db.get_productos_usuario(user_id)
     deuda = next((p for p in productos if p.get("deuda_actual") and p["deuda_actual"] > 0), None)
     if not deuda:
         return {"error": "sin deuda activa"}
-    return db.simular_plan_pago(deuda["deuda_actual"], meses, cat)
+    monto = deuda["deuda_actual"]
+    plazos = sorted({12, 18, 24, meses})
+    opciones = [
+        {**db.simular_plan_pago(monto, m, round(cat + (m - 12) / 6 * 1.5, 1))}
+        for m in plazos
+    ]
+    return {"monto_original": monto, "opciones": opciones}
 
 
 @mcp.tool

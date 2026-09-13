@@ -4,8 +4,196 @@
     flex-direction: column;
     gap: 16px;
     width: 100%;
-    max-width: 720px;
+    max-width: 960px;
     margin-top: 24px;
+}
+
+/* Dashboard: los componentes de una respuesta se acomodan en grid */
+.muuk-surface {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+/* El componente preferido (primero por score) y TODAS las gráficas
+   (Grafica*) ocupan más ancho: lo principal de la respuesta se ve grande.
+   Solo en pantallas donde el grid cabe en ≥2 columnas. */
+@media (min-width: 720px) {
+    .muuk-surface > div:first-child,
+    .muuk-surface > .muuk-grande {
+        grid-column: span 2;
+    }
+}
+
+/* Tarjeta de info al cursor (props.info del catálogo) */
+.muuk-hover {
+    position: relative;
+    min-width: 0;
+}
+
+.muuk-hovercard {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+
+    width: max-content;
+    max-width: 260px;
+    padding: 10px 12px;
+    margin: 0;
+
+    background: #292929;
+    color: #fff;
+    font-size: 13px;
+    line-height: 1.35;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s ease, visibility 0s linear 0.15s;
+    pointer-events: none;
+}
+
+.muuk-hover:hover .muuk-hovercard {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.15s ease 0.5s, visibility 0s linear 0.5s;
+}
+
+/* Tooltip granular universal: data-tip en cualquier elemento HTML interno */
+[data-tip] {
+    position: relative;
+}
+
+[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+
+    width: max-content;
+    max-width: 240px;
+    padding: 6px 10px;
+
+    background: #292929;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.3;
+    text-align: center;
+    border-radius: 6px;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.12s ease, visibility 0s linear 0.12s;
+    pointer-events: none;
+}
+
+[data-tip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.12s ease 0.5s, visibility 0s linear 0.5s;
+}
+
+/* Chip de comando de interfaz ejecutado (modo oscuro, exportar PDF) */
+.muuk-comando-chip {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #292929;
+    color: #fff;
+    font-size: 12px;
+    border-radius: 999px;
+}
+
+/* ── Modo oscuro del chat (ComandoUI: modo_oscuro) ────────────────────── */
+
+body.muuk-dark .muuk-plan,
+body.muuk-dark .muuk-loader,
+body.muuk-dark .muuk-texto,
+body.muuk-dark .muuk-detalles {
+    background: #1e1e1e;
+    color: #f5f5f5;
+}
+
+body.muuk-dark .muuk-title,
+body.muuk-dark .muuk-metrica-valor,
+body.muuk-dark .muuk-texto,
+body.muuk-dark .muuk-donut-total,
+body.muuk-dark .muuk-fila-info b,
+body.muuk-dark .muuk-leyenda li {
+    color: #f5f5f5;
+}
+
+body.muuk-dark .muuk-leyenda li:hover,
+body.muuk-dark .muuk-leyenda li.activa {
+    background: #2a2a2a;
+}
+
+/* Entrada fluida de cada bloque (mensaje, surface, loader) */
+.muuk-chat > * {
+    animation: muuk-in 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes muuk-in {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* Loader con puntos rebotando */
+.muuk-loader {
+    display: flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 6px;
+
+    padding: 12px 16px;
+    border-radius: 16px 16px 16px 4px;
+    background: #f5f5f5;
+}
+
+.muuk-loader-texto {
+    font-size: 13px;
+    color: #777777;
+    margin-right: 6px;
+}
+
+.muuk-loader-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #b5121b;
+
+    animation: muuk-bounce 1s infinite ease-in-out;
+}
+
+.muuk-loader-dot:nth-of-type(3) {
+    animation-delay: 0.15s;
+}
+
+.muuk-loader-dot:nth-of-type(4) {
+    animation-delay: 0.3s;
+}
+
+@keyframes muuk-bounce {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.35;
+    }
+    30% {
+        transform: translateY(-6px);
+        opacity: 1;
+    }
 }
 
 .muuk-user {
@@ -18,9 +206,15 @@
 }
 
 .muuk-texto {
-    align-self: flex-start;
+    align-self: stretch;
     margin: 0;
+    padding: 14px 18px;
+    background: #f5f5f5;
+    border-left: 4px solid #b5121b;
+    border-radius: 0 10px 10px 0;
     color: #292929;
+    max-width: 960px;
+    line-height: 1.45;
 }
 
 .muuk-detalles {
@@ -28,4 +222,32 @@
     padding: 12px;
     border-radius: 4px;
     overflow-x: auto;
+}
+
+/* ── Perfil senior: accesibilidad (letra grande) ──────────────────────── */
+/* El servidor envía dataModelUpdate(/perfil) cuando usuario.edad >= 60. */
+
+.muuk-perfil-senior .muuk-texto,
+.muuk-perfil-senior .muuk-user {
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+.muuk-perfil-senior .muuk-title,
+.muuk-perfil-senior .muuk-leyenda li,
+.muuk-perfil-senior .muuk-barra-etq,
+.muuk-perfil-senior .muuk-barra-valor,
+.muuk-perfil-senior .muuk-metrica-titulo,
+.muuk-perfil-senior .muuk-metrica-sub,
+.muuk-perfil-senior .muuk-hovercard {
+    font-size: 17px;
+}
+
+.muuk-perfil-senior .muuk-metrica-valor {
+    font-size: 54px;
+}
+
+.muuk-perfil-senior .muuk-loader-texto,
+.muuk-perfil-senior .muuk-leyenda-nombre {
+    font-size: 17px;
 }

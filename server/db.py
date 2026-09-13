@@ -60,12 +60,49 @@ def _q1(sql: str, params: tuple = ()) -> dict | None:
 def get_usuario(user_id: str) -> dict | None:
     return _q1("SELECT * FROM usuario WHERE user_id = %s", (user_id,))
 
-def get_usuarios() -> list[dict]:
-    """Lista de los usuarios demo, para el selector de login del frontend."""
-    return _q("SELECT user_id, nombre FROM usuario")
+def get_usuario(user_id: str) -> dict | None:
+    return _q1("SELECT * FROM usuario WHERE user_id = %s", (user_id,))
+
+def validar_login(nombre: str, password: str) -> dict | None:
+    """Login real por usuario: nombre (completo o primer nombre) + password.
+    Devuelve {user_id, nombre} si las credenciales son válidas, None si no."""
+    import hashlib
+    h = hashlib.sha256(password.encode()).hexdigest()
+    return _q1(
+        """SELECT user_id, nombre FROM usuario
+           WHERE (lower(nombre) = lower(%s) OR lower(split_part(nombre, ' ', 1)) = lower(%s))
+             AND password_hash = %s""",
+        (nombre.strip(), nombre.strip(), h),
+    )
 
 def get_perfil_financiero(user_id: str) -> dict | None:
     return _q1("SELECT * FROM perfil_financiero WHERE user_id = %s", (user_id,))
+
+
+def get_presupuesto_estimado(user_id: str) -> list[dict]:
+    """Presupuesto implícito por categoría: promedio mensual histórico vs mes
+    actual. Semáforo de estado: sobre / al_límite / bajo."""
+    return _q(
+        """WITH res AS (
+               SELECT r.categoria,
+                      avg(r.total_gastado) FILTER (WHERE r.mes < date_trunc('month', now())) AS promedio_mensual,
+                      max(r.total_gastado) FILTER (WHERE r.mes = date_trunc('month', now())) AS mes_actual
+               FROM transaccion_resumen r
+               JOIN usuario_producto up ON up.user_product_id = r.user_product_id
+               WHERE up.user_id = %s
+               GROUP BY r.categoria
+           )
+           SELECT categoria,
+                  round(promedio_mensual, 2) AS promedio_mensual,
+                  round(coalesce(mes_actual, 0), 2) AS mes_actual,
+                  CASE WHEN mes_actual > promedio_mensual THEN 'sobre'
+                       WHEN mes_actual >= promedio_mensual * 0.9 THEN 'al_limite'
+                       ELSE 'bajo' END AS estado
+           FROM res
+           WHERE promedio_mensual IS NOT NULL AND mes_actual IS NOT NULL
+           ORDER BY mes_actual DESC""",
+        (user_id,),
+    )
 
 
 def get_productos_usuario(user_id: str) -> list[dict]:
@@ -147,11 +184,16 @@ def resolve_componente(nombre: str) -> str | None:
 
 
 def seed_componente_ui():
-    """Inserta las 3 componentes del catálogo si no existen ya."""
+    """Inserta las componentes del catálogo si no existen ya."""
     for nombre, tipo, desc in [
         ("PlanDePago", "financiero", "Opciones de reestructura de deuda con CTA"),
         ("TablaGastos", "financiero", "Tabla de gastos/agregados por categoría"),
         ("Confirmacion", "ui", "Confirmación de acción del usuario"),
+        ("GraficaPastel", "visualizacion", "Distribución por categoría (donut, rebanadas clicables)"),
+        ("GraficaBarras", "visualizacion", "Serie por periodo (barras clicables)"),
+        ("TarjetaMetrica", "resumen", "Métrica destacada con valor grande"),
+        ("GraficaLinea", "visualizacion", "Tendencia por periodo (línea, puntos clicables)"),
+        ("ProgresoMeta", "meta", "Progreso hacia meta de ahorro (barra con %)"),
     ]:
         if not _q1("SELECT 1 FROM componente_ui WHERE nombre = %s", (nombre,)):
             _q("INSERT INTO componente_ui (nombre, tipo, descripcion) VALUES (%s, %s, %s)", (nombre, tipo, desc))
@@ -178,7 +220,8 @@ def get_preferencias(user_id: str, intencion_nombre: str | None = None) -> list[
            FROM preferencia_ui p
            JOIN intencion i ON i.intencion_id = p.intencion_id
            JOIN componente_ui c ON c.componente_id = p.componente_id
-           WHERE p.user_id = %s""",
+           WHERE p.user_id = %s
+           ORDER BY p.score DESC NULLS LAST""",
         (user_id,),
     )
 
