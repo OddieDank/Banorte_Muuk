@@ -23,10 +23,9 @@ const API = "http://localhost:8000";
 // usuario logueado (bug: inicias con Marisol y ves datos de Ana).
 const getUserId = () => localStorage.getItem("user_id");
 
-function MuukChat({ consulta }) {
+function MuukChat({ consulta, vozActiva = false }) {
     const sessionRef = useRef(crypto.randomUUID());
     const [perfil, setPerfil] = useState("estandar");
-    const [vozActiva, setVozActiva] = useState(false);
 
     const onAction = useCallback(async (accion) => {
         // El payload llega tal cual lo despachó el componente (componente/evento/payload).
@@ -45,12 +44,12 @@ function MuukChat({ consulta }) {
     return (
         <A2UIProvider catalog={muukCatalog} onAction={onAction}>
             <ChatInner consulta={consulta} perfil={perfil} setPerfil={setPerfil}
-                sessionRef={sessionRef} vozActiva={vozActiva} setVozActiva={setVozActiva} />
+                sessionRef={sessionRef} vozActiva={vozActiva} />
         </A2UIProvider>
     );
 }
 
-function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva, setVozActiva }) {
+function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva }) {
     const [bloques, setBloques] = useState([]);
     const [cargando, setCargando] = useState(false);
     const a2ui = useA2UI();
@@ -137,13 +136,6 @@ function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva, setVozA
 
     return (
         <section className={`muuk-chat ${perfil === "senior" ? "muuk-perfil-senior" : ""}`}>
-            <button
-                type="button"
-                className={`voz-toggle ${vozActiva ? "activa" : ""}`}
-                onClick={() => setVozActiva((v) => !v)}
-            >
-                {vozActiva ? "🔊 Voz activada" : "🔇 Voz desactivada"}
-            </button>
             {bloques.map((b, i) =>
                 b.tipo === "surface" ? (
                     <div key={i} className="muuk-surface">

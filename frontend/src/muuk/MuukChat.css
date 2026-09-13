@@ -11,29 +11,6 @@
     scrollbar-width: thin;
 }
 
-/* Botón voz: pill compacta alineada a la derecha */
-.voz-toggle {
-    align-self: flex-end;
-    padding: 6px 14px;
-    border: 1px solid #d0d4da;
-    border-radius: 999px;
-    background: #fff;
-    color: #5a6672;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.15s, color 0.15s, border-color 0.15s;
-}
-
-.voz-toggle:hover {
-    background: #f0f1f3;
-}
-
-.voz-toggle.activa {
-    background: #ec1c2d;
-    border-color: #ec1c2d;
-    color: #fff;
-}
-
 /* Dashboard: los componentes de una respuesta se acomodan en grid */
 .muuk-surface {
     display: grid;

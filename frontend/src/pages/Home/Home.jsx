@@ -16,6 +16,7 @@ function Home({ onLogout }) {
     const username = localStorage.getItem("username") || "Usuario";
     const [consulta, setConsulta] = useState("");
     const [vista, setVista] = useState("home");
+    const [vozActiva, setVozActiva] = useState(false);
 
     return (
         <div className="home">
@@ -33,11 +34,15 @@ function Home({ onLogout }) {
                     <>
                         <Hero />
 
-                        <Header username={username} />
+                        <Header
+                            username={username}
+                            vozActiva={vozActiva}
+                            onToggleVoz={() => setVozActiva((v) => !v)}
+                        />
 
                         <SearchBar onSearch={setConsulta} />
 
-                        <MuukChat consulta={consulta} />
+                        <MuukChat consulta={consulta} vozActiva={vozActiva} />
 
                         <section className="quick-actions">
 
