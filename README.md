@@ -6,6 +6,11 @@ Agente de IA que **genera la interfaz en tiempo real**: el usuario pregunta en l
 
 ## Tecnologías reales
 
+======== DUMMY USERS AND PASSWORDS ========
+Ana Torres     -->   ana2026
+Roberto Díaz	 -->   roberto2026
+Marisol Gómez	 -->   marisol2026
+
 | Capa | Tech |
 |---|---|
 | Modelo | Gemini via `agno` |
