@@ -7,6 +7,7 @@ import Header from "../../components/Header/Header";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import ActionCard from "../../components/ActionCard/ActionCard";
 import MuukChat from "../../muuk/MuukChat";
+import Perfil from "../Perfil/Perfil";
 
 import { describirUI } from "../../services/tts";
 
@@ -14,44 +15,54 @@ function Home({ onLogout }) {
 
     const username = localStorage.getItem("username") || "Usuario";
     const [consulta, setConsulta] = useState("");
+    const [vista, setVista] = useState("home");
 
     return (
         <div className="home">
 
-            <Sidebar onLogout={onLogout} />
+            <Sidebar
+                onLogout={onLogout}
+                onProfileClick={() => setVista(vista === "perfil" ? "home" : "perfil")}
+            />
 
             <main className="home-content">
 
-                <Hero />
+                {vista === "perfil" ? (
+                    <Perfil onBack={() => setVista("home")} />
+                ) : (
+                    <>
+                        <Hero />
 
-                <Header username={username} />
+                        <Header username={username} />
 
-                <SearchBar onSearch={setConsulta} />
+                        <SearchBar onSearch={setConsulta} />
 
-                <MuukChat consulta={consulta} />
+                        <MuukChat consulta={consulta} />
 
-                <section className="quick-actions">
+                        <section className="quick-actions">
 
-                    <ActionCard
-                        title="Regresar al portal Banorte"
-                        description="Volver al sitio principal para continuar con tus operaciones bancarias."
-                        onClick={() => {
-                            window.location.href = "https://www.banorte.com/";
-                        }}
-                    />
+                            <ActionCard
+                                title="Regresar al portal Banorte"
+                                description="Volver al sitio principal para continuar con tus operaciones bancarias."
+                                onClick={() => {
+                                    window.location.href = "https://www.banorte.com/";
+                                }}
+                            />
 
-                </section>
+                        </section>
 
-                <button
-                    className="tts-button"
-                    onClick={() =>
-                        describirUI(
-                            "Bienvenido al asistente digital de Banorte."
-                        )
-                    }
-                >
-                    Escuchar presentación
-                </button>
+                        <button
+                            className="tts-button"
+                            onClick={() =>
+                                describirUI(
+                                    "Bienvenido al asistente digital de Banorte."
+                                )
+                            }
+                        >
+                            Escuchar presentación
+                        </button>
+                    </>
+                )}
 
             </main>
 

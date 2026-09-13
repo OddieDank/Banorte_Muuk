@@ -198,3 +198,15 @@ async def stt(request: Request, file: UploadFile = File(...)):
     audio_bytes = await file.read()
     texto = voice.transcribe_speech(audio_bytes)
     return {"text": texto}
+
+@app.get("/perfil")
+def perfil(request: Request, user_id: str = DEFAULT_USER):
+    _check_rate(request.client.host if request.client else "demo")
+    usuario = db.get_usuario(user_id)
+    if not usuario:
+        raise HTTPException(404, "usuario no encontrado")
+    return {
+        "usuario": usuario,
+        "perfil_financiero": db.get_perfil_financiero(user_id),
+        "productos": db.get_productos_usuario(user_id),
+    }
