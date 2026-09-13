@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import muukCoin from "../../public/muuk_coin.png";
 import "./Perfil.css";
 
 const API = "http://localhost:8000";
@@ -7,21 +8,44 @@ function Perfil({ onBack }) {
     const [datos, setDatos] = useState(null);
     const [cargando, setCargando] = useState(true);
     const [error, setError] = useState("");
+    const [muukCoins, setMuukCoins] = useState(null);
+    const [muukHistory, setMuukHistory] = useState([]);
 
     useEffect(() => {
         const userId = localStorage.getItem("user_id");
+
         if (!userId) {
             setError("No se encontró el usuario.");
             setCargando(false);
             return;
         }
 
-        fetch(`${API}/perfil?user_id=${userId}`)
-            .then((r) => {
-                if (!r.ok) throw new Error("No se pudo cargar el perfil.");
-                return r.json();
+        Promise.all([
+            fetch(`${API}/perfil?user_id=${userId}`),
+            fetch(`${API}/muuk-coins/history?user_id=${userId}`)
+        ])
+            .then(async ([perfilResponse, coinsResponse]) => {
+                if (!perfilResponse.ok) {
+                    throw new Error("No se pudo cargar el perfil.");
+                }
+
+                if (!coinsResponse.ok) {
+                    throw new Error("No se pudo cargar el historial de Muuk Coins.");
+                }
+
+                const perfilData = await perfilResponse.json();
+                const coinsData = await coinsResponse.json();
+
+                return {
+                    perfilData,
+                    coinsData
+                };
             })
-            .then((data) => setDatos(data))
+            .then(({ perfilData, coinsData }) => {
+                setDatos(perfilData);
+                setMuukCoins(coinsData.balance);
+                setMuukHistory(coinsData.history);
+            })
             .catch((err) => setError(err.message))
             .finally(() => setCargando(false));
     }, []);
@@ -95,6 +119,74 @@ function Perfil({ onBack }) {
                     </div>
                 </section>
             )}
+
+            <section className="perfil-card perfil-coins-card">
+                <div className="perfil-card-accent"></div>
+
+                <div className="perfil-card-content">
+
+                    <div className="perfil-coins-header">
+                        <div>
+                            <h2>Muuk Coins</h2>
+                            <p className="perfil-coins-subtitulo">
+                                Recompensas por tus buenos hábitos financieros
+                            </p>
+                        </div>
+
+                        <div className="perfil-coins-balance">
+                            <img
+                                src={muukCoin}
+                                alt="Muuk Coin"
+                                className="perfil-coins-icon"
+                            />
+                            <span>{muukCoins ?? 0}</span>
+                        </div>
+                    </div>
+
+                    <div className="perfil-coins-divider"></div>
+
+                    <h3 className="perfil-coins-historial-titulo">
+                        Historial de movimientos
+                    </h3>
+
+                    {muukHistory.length === 0 ? (
+                        <p className="perfil-vacio">
+                            Todavía no tienes movimientos de Muuk Coins.
+                        </p>
+                    ) : (
+                        <ul className="perfil-coins-lista">
+                            {muukHistory.map((movimiento) => (
+                                <li
+                                    key={movimiento.muuk_coin_transaction_id}
+                                    className="perfil-coins-movimiento"
+                                >
+                                    <div className="perfil-coins-movimiento-info">
+                                        <span className="perfil-coins-descripcion">
+                                            {movimiento.descripcion}
+                                        </span>
+
+                                        <span className="perfil-coins-tipo">
+                                            {movimiento.tipo}
+                                        </span>
+                                    </div>
+
+                                    <div className="perfil-coins-cantidad">
+                                        {movimiento.cantidad > 0 ? "+" : ""}
+                                        {movimiento.cantidad}
+
+                                        <img
+                                            src={muukCoin}
+                                            alt="Muuk Coin"
+                                            className="perfil-coins-icon-small"
+                                        />
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+
+                </div>
+            </section>
 
             <section className="perfil-card">
                 <div className="perfil-card-accent"></div>
