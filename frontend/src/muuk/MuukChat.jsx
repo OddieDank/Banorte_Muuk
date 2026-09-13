@@ -137,7 +137,7 @@ function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva, setVozA
         <section className={`muuk-chat ${perfil === "senior" ? "muuk-perfil-senior" : ""}`}>
             <button
                 type="button"
-                className="voz-toggle"
+                className={`voz-toggle ${vozActiva ? "activa" : ""}`}
                 onClick={() => setVozActiva((v) => !v)}
             >
                 {vozActiva ? "🔊 Voz activada" : "🔇 Voz desactivada"}

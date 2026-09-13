@@ -369,7 +369,7 @@ extendido). Adapta el TONO:
 def build_agent(mcp_command: list[str] | None = None) -> Agent:
 
     command = mcp_command or [
-        "python",
+        sys.executable,  # el intérprete del venv; "python" a secas falla
         str(Path(__file__).parent / "mcp_server.py"),
     ]
 
