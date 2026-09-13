@@ -18,7 +18,7 @@ import "../components/Graficas.css";
 import "./MuukChat.css";
 import { describirUI } from "../services/tts";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL;
 // user_id se lee en cada fetch: cachearlo en el módulo congela al primer
 // usuario logueado (bug: inicias con Marisol y ves datos de Ana).
 const getUserId = () => localStorage.getItem("user_id");

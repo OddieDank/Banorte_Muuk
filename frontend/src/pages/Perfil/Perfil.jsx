@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import muukCoin from "../../public/muuk_coin.png";
 import "./Perfil.css";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL;
 
 function Perfil({ onBack }) {
     const [datos, setDatos] = useState(null);
@@ -67,7 +67,19 @@ function Perfil({ onBack }) {
         );
     }
 
-    const { usuario, perfil_financiero, productos } = datos;
+    const { usuario, perfil_financiero, productos, plan_pago } = datos;
+
+    let progresoPlan = null;
+    if (plan_pago) {
+        const inicio = new Date(plan_pago.creado_ts);
+        const ahora = new Date();
+        const mesesTranscurridos = Math.max(0, Math.min(
+            plan_pago.meses,
+            (ahora.getFullYear() - inicio.getFullYear()) * 12 + (ahora.getMonth() - inicio.getMonth())
+        ));
+        const porcentaje = Math.round((mesesTranscurridos / plan_pago.meses) * 100);
+        progresoPlan = { mesesTranscurridos, porcentaje };
+    }
 
     return (
         <div className="perfil-page">
@@ -120,6 +132,44 @@ function Perfil({ onBack }) {
                 </section>
             )}
 
+            {plan_pago && (
+                <section className="perfil-card">
+                    <div className="perfil-card-accent"></div>
+                    <div className="perfil-card-content">
+                        <h2>Plan de pago activo</h2>
+                        <div className="perfil-fila">
+                            <span className="perfil-label">Plazo</span>
+                            <span className="perfil-valor">{plan_pago.meses} meses</span>
+                        </div>
+                        <div className="perfil-fila">
+                            <span className="perfil-label">Pago mensual</span>
+                            <span className="perfil-valor">
+                                {Number(plan_pago.pago_mensual).toLocaleString("es-MX", { style: "currency", currency: "MXN" })}
+                            </span>
+                        </div>
+                        <div className="perfil-fila">
+                            <span className="perfil-label">CAT</span>
+                            <span className="perfil-valor">{plan_pago.cat}%</span>
+                        </div>
+
+                        <div className="perfil-progreso-header">
+                            <span className="perfil-label">
+                                Progreso estimado ({progresoPlan.mesesTranscurridos} de {plan_pago.meses} meses)
+                            </span>
+                            <span className="perfil-valor">{progresoPlan.porcentaje}%</span>
+                        </div>
+                        <div className="perfil-progreso-barra">
+                            <div
+                                className="perfil-progreso-relleno"
+                                style={{ width: `${progresoPlan.porcentaje}%` }}
+                            ></div>
+                        </div>
+                        <p className="perfil-nota">
+                            Estimado según el tiempo transcurrido desde que aplicaste el plan, no un conteo de pagos confirmados.
+                        </p>
+                    </div>
+                </section>
+            )}
             <section className="perfil-card perfil-coins-card">
                 <div className="perfil-card-accent"></div>
 

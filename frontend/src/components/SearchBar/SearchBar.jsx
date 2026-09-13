@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import "./SearchBar.css";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL;
 
 // Umbral de volumen para considerar que hay voz (0 a 1, escala RMS).
 const UMBRAL_VOZ = 0.02;
