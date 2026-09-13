@@ -1,7 +1,7 @@
 // ProgresoMeta — barra de progreso hacia una meta de ahorro.
 // Clic dispatch("ver_meta") → /action (memoria adaptativa).
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 const formato = (n: number) => n.toLocaleString("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 });
 

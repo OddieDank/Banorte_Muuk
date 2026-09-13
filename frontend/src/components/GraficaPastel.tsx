@@ -1,8 +1,8 @@
 // GraficaPastel — donut SVG propio. Cada rebanada y leyenda es clicable:
 // dispatch("ver_categoria") → /action → interaction_log (memoria adaptativa).
 import { useState } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 interface Segmento { etiqueta: string; valor: number; }
 

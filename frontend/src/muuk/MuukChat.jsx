@@ -1,8 +1,9 @@
-// MuukChat — conecta la app con el agente: POST /chat (SSE) → adapter A2UI
-// → registry → componentes. dispatch de acciones → POST /action (loop cerrado).
-import { useEffect, useRef, useState } from "react";
-import { applyMessage } from "../a2ui/adapter";
-import { renderComponent } from "../a2ui/registry";
+// MuukChat — conecta la app con el agente: POST /chat (stream AG-UI) →
+// useA2UI().processMessages(ops v0.9) → A2UIRenderer → componentes.
+// onAction → POST /action (loop cerrado, igual que antes).
+import { useEffect, useRef, useState, useCallback } from "react";
+import { A2UIProvider, A2UIRenderer, useA2UI } from "@copilotkit/a2ui-renderer";
+import { muukCatalog } from "../lib/a2ui/muukCatalog";
 import "../components/PlanDePago";
 import "../components/TablaGastos";
 import "../components/Confirmacion";
@@ -17,18 +18,52 @@ import "../components/Graficas.css";
 import "./MuukChat.css";
 import { describirUI } from "../services/tts";
 
-const API = import.meta.env.VITE_API_URL;
+import { API } from "../lib/api";
 // user_id se lee en cada fetch: cachearlo en el módulo congela al primer
 // usuario logueado (bug: inicias con Marisol y ves datos de Ana).
 const getUserId = () => localStorage.getItem("user_id");
 
-function MuukChat({ consulta }) {
+function MuukChat({ consulta, vozActiva = false }) {
+    const sessionRef = useRef(crypto.randomUUID());
+    const [perfil, setPerfil] = useState("estandar");
+
+    const onAction = useCallback(async (accion) => {
+        // El payload llega tal cual lo despachó el componente (componente/evento/payload).
+        const res = await fetch(`${API}/action`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...accion, session_id: sessionRef.current, user_id: getUserId() }),
+        });
+        const data = await res.json();
+        if (data.plan) {
+            // se expone como "flotante" — ChatInner lo agrega como burbuja vía eventBus simple:
+            window.dispatchEvent(new CustomEvent("muuk-action-result", { detail: data.plan }));
+        }
+    }, []);
+
+    return (
+        <A2UIProvider catalog={muukCatalog} onAction={onAction}>
+            <ChatInner consulta={consulta} perfil={perfil} setPerfil={setPerfil}
+                sessionRef={sessionRef} vozActiva={vozActiva} />
+        </A2UIProvider>
+    );
+}
+
+function ChatInner({ consulta, perfil, setPerfil, sessionRef, vozActiva }) {
     const [bloques, setBloques] = useState([]);
     const [cargando, setCargando] = useState(false);
-    const [perfil, setPerfil] = useState("estandar");
-    const [vozActiva, setVozActiva] = useState(false);
-    const surfacesRef = useRef({});
-    const sessionRef = useRef(crypto.randomUUID());
+    const a2ui = useA2UI();
+    const a2uiRef = useRef(a2ui);
+    a2uiRef.current = a2ui;
+
+    useEffect(() => {
+        const handler = (e) => {
+            const plan = e.detail;
+            setBloques((b) => [...b, { tipo: "texto", texto: `Plan aplicado (id ${plan.plan_id}).` }]);
+        };
+        window.addEventListener("muuk-action-result", handler);
+        return () => window.removeEventListener("muuk-action-result", handler);
+    }, []);
 
     useEffect(() => {
         if (!consulta) return;
@@ -48,6 +83,7 @@ function MuukChat({ consulta }) {
             const reader = res.body.getReader();
             const decoder = new TextDecoder();
             let buf = "";
+            let textoAcumulado = "";
 
             while (true) {
                 const { done, value } = await reader.read();
@@ -61,17 +97,26 @@ function MuukChat({ consulta }) {
                     if (!linea.startsWith("data:")) continue;
                     const msg = JSON.parse(linea.slice(5));
 
-                    if (msg.type === "dataModelUpdate" && msg.path === "/perfil") {
+                    if (msg.type === "CUSTOM" && msg.name === "muuk-perfil") {
                         // Perfil UI del usuario (edad): senior → letra grande.
                         setPerfil(msg.value?.perfil === "senior" ? "senior" : "estandar");
-                    } else if (msg.type === "dataModelUpdate" && msg.path === "/meta") {
-                        setBloques((b) => [...b, { tipo: "texto", texto: msg.value.texto }]);
-                        if (vozActiva) describirUI(msg.value.texto);
-                    } else {
-                        surfacesRef.current = applyMessage(surfacesRef.current, msg);
-                        if (msg.type === "surfaceUpdate") {
-                            const surface = surfacesRef.current[msg.surfaceId];
-                            setBloques((b) => [...b, { tipo: "surface", id: msg.surfaceId, surface }]);
+                    } else if (msg.type === "TEXT_MESSAGE_CONTENT") {
+                        textoAcumulado += msg.delta || "";
+                    } else if (msg.type === "TEXT_MESSAGE_END") {
+                        // Solo burbuja si hay texto: Gemini a veces emite START/END vacío.
+                        const t = textoAcumulado.trim();
+                        if (t) {
+                            setBloques((b) => [...b, { tipo: "texto", texto: t }]);
+                            if (vozActiva) describirUI(t);
+                        }
+                        textoAcumulado = "";
+                    } else if (msg.type === "ACTIVITY_SNAPSHOT" && msg.activityType === "a2ui-surface") {
+                        const ops = msg.content?.a2ui_operations || [];
+                        const createOp = ops.find((o) => o.createSurface);
+                        const surfaceId = createOp?.createSurface?.surfaceId;
+                        a2uiRef.current.processMessages(ops);
+                        if (surfaceId) {
+                            setBloques((b) => [...b, { tipo: "surface", id: surfaceId }]);
                         }
                     }
                 }
@@ -87,38 +132,14 @@ function MuukChat({ consulta }) {
         return () => ctrl.abort();
     }, [consulta]);
 
-    const dispatch = async (accion) => {
-        const res = await fetch(`${API}/action`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...accion, session_id: sessionRef.current, user_id: getUserId() }),
-        });
-        const data = await res.json();
-        if (data.plan) {
-            setBloques((b) => [...b, {
-                tipo: "texto",
-                texto: `Plan aplicado (id ${data.plan.plan_id}).`,
-            }]);
-        }
-    };
-
     if (bloques.length === 0 && !cargando) return null;
 
     return (
         <section className={`muuk-chat ${perfil === "senior" ? "muuk-perfil-senior" : ""}`}>
-            <button
-                type="button"
-                className="voz-toggle"
-                onClick={() => setVozActiva((v) => !v)}
-            >
-                {vozActiva ? "🔊 Voz activada" : "🔇 Voz desactivada"}
-            </button>
             {bloques.map((b, i) =>
                 b.tipo === "surface" ? (
                     <div key={i} className="muuk-surface">
-                        {b.surface.components.map((c) => (
-                            <div key={c.componentId} className={c.componentType?.startsWith("Grafica") ? "muuk-grande" : ""}>{renderComponent(c, dispatch)}</div>
-                        ))}
+                        <A2UIRenderer surfaceId={b.id} />
                     </div>
                 ) : (
                     <p key={i} className={b.tipo === "user" ? "muuk-user" : "muuk-texto"}>{b.texto}</p>

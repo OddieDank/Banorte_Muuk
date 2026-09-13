@@ -1,10 +1,44 @@
 .home-header {
+    position: relative;
     width: 100%;
     max-width: 920px;
 
     text-align: center;
 
     margin-bottom: 30px;
+}
+
+/* Botón de voz: circular, esquina superior derecha del header */
+.voz-toggle {
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 44px;
+    height: 44px;
+    padding: 0;
+
+    border: 1px solid #d0d4da;
+    border-radius: 50%;
+    background: #fff;
+    color: #5a6672;
+
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.voz-toggle:hover {
+    background: #f0f1f3;
+}
+
+.voz-toggle.activa {
+    background: #ec1c2d;
+    border-color: #ec1c2d;
+    color: #fff;
 }
 
 

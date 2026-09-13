@@ -1,8 +1,9 @@
-"""Catálogo A2UI propio de Muuk (subset v0.9.1).
+"""Catálogo de Muuk (validación fail-closed, espejo del catalog del frontend).
 
-Los únicos componentes que el agente puede renderizar viven aquí.
-El servidor valida cada salida del LLM contra este catálogo antes de SSE;
-componente desconocido → fallo cerrado (anti UI-injection).
+Los únicos componentes que el agente puede renderizar viven aquí; el server
+valida cada salida del LLM antes de armar las ops A2UI v0.9 oficiales
+(a2ui_stream). El frontend registra el mismo catálogo con Zod/renderers
+(frontend/src/lib/a2ui/muukCatalog.jsx) — como dicta la spec A2UI.
 
 "info" (prop opcional, heredada de InfoMixin): frase explicativa que el
 frontend muestra como tarjeta al poner el cursor encima del componente.
@@ -121,9 +122,4 @@ def validar_componente(componentType: str, props: dict) -> bool:
         return True
     except Exception:
         return False
-
-
-def new_message(bucket: str, **payload) -> dict:
-    """Envoltura simple para SSE; el adapter del frontend para un único mensaje."""
-    return {"type": bucket, **payload}
 

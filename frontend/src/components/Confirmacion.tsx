@@ -1,5 +1,5 @@
 // Confirmacion — mensaje de cierre + detalles opcionales.
-import { register } from "../a2ui/registry";
+import { register } from "../lib/registry";
 
 register("Confirmacion", ({ props }: { props: Record<string, unknown> }) => (
   <div className="muuk-plan">

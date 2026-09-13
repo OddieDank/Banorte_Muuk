@@ -1,8 +1,8 @@
 // GraficaLinea — tendencia por periodo en SVG propio, sin librerías.
 // Puntos y etiquetas clicables: dispatch("ver_punto") → /action (memoria adaptativa).
 import { useState } from "react";
-import { register } from "../a2ui/registry";
-import type { OneOffAction } from "../a2ui/types";
+import { register } from "../lib/registry";
+import type { OneOffAction } from "../lib/registry-types";
 
 interface Punto { etiqueta: string; valor: number; }
 
@@ -27,7 +27,7 @@ register("GraficaLinea", ({ props, dispatch }: { props: Record<string, unknown>;
   return (
     <div className="muuk-plan muuk-chart">
       <h3 className="muuk-title">{String(props.titulo ?? "Tendencia")}</h3>
-      <svg viewBox="0 0 100 50" className="muuk-linea" role="img">
+      <svg viewBox="0 0 100 56" className="muuk-linea" role="img">
         {[0.25, 0.5, 0.75].map((f) => (
           <line key={f} x1="8" x2="92" y1={44 - f * 36} y2={44 - f * 36} className="muuk-linea-grid" />
         ))}
@@ -40,7 +40,8 @@ register("GraficaLinea", ({ props, dispatch }: { props: Record<string, unknown>;
             <text x={x(i)} y={y(p.valor) - 3} textAnchor="middle" className="muuk-linea-val">
               {sel === i ? formato(p.valor) : ""}
             </text>
-            <text x={x(i)} y={49} textAnchor="end" transform={`rotate(-38, ${x(i)}, 49)`} className="muuk-linea-etq">{p.etiqueta}</text>
+            {/* viewBox sube a 56: las etiquetas (-38°) ya no se cortan */}
+            <text x={x(i)} y={52} textAnchor="end" transform={`rotate(-38, ${x(i)}, 52)`} className="muuk-linea-etq">{p.etiqueta}</text>
           </g>
         ))}
       </svg>

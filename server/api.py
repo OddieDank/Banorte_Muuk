@@ -1,7 +1,9 @@
-"""API de Muuk: SSE con mensajes A2UI + acciones de regreso.
+"""API de Muuk: AG-UI (transporte oficial) + A2UI v0.9 + acciones de regreso.
 
 Rutas:
-  POST /chat    → SSE con A2UI (createSurface, surfaceUpdate, deleteSurface).
+  POST /chat    → SSE con eventos AG-UI; la superficie llega como
+                  ACTIVITY_SNAPSHOT (a2ui-surface) con ops v0.9
+                  (createSurface/updateComponents/updateDataModel).
   POST /action  → interacción del usuario; cierra loop + memoria adaptativa.
 """
 
@@ -13,7 +15,9 @@ from collections import defaultdict
 
 import agent
 import db
-from catalog import validar_componente, new_message
+import a2ui_stream
+from catalog import validar_componente
+from ag_ui.encoder import EventEncoder
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -89,12 +93,9 @@ def _perfil_ui(user_id: str) -> dict:
     return {"perfil": "senior" if senior else "estandar", "detalle": "simple" if senior else "extendido"}
 
 
-def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
-    surface_id = f"s-{session_id}-{uuid.uuid4().hex[:6]}"
-    msgs = [new_message("createSurface", surfaceId=surface_id)]
-
-    # Válidos, deduplicados por (type, props): el LLM a veces emite la misma
-    # tarjeta/gráfica N veces idéntica (respondemos una sola).
+def _limpiar_componentes(resp, user_id: str, session_id: str) -> list:
+    """Validación fail-closed + dedupe + orden por preferencias del usuario.
+    Igual que antes, pero ahora se aplica antes de construir las ops v0.9."""
     valid = []
     seen = set()
     for c in resp.componentes:
@@ -106,21 +107,13 @@ def _to_surface(session_id: str, resp, user_id: str) -> list[dict]:
             continue
         seen.add(clave)
         valid.append(c)
-
-    # Preferencias del usuario: componentes preferidos primero (positivo)
     preferred = [p["componente_nombre"] for p in db.get_preferencias(user_id) if p.get("componente_nombre")]
     pos = {c: i for i, c in enumerate(preferred)}
     valid.sort(key=lambda c: pos.get(c.type, len(pos)))
-    comps = [{"componentId": f"c{i}", "componentType": c.type, "props": c.props} for i, c in enumerate(valid)]
-
-    if comps:
-        msgs.append(new_message("surfaceUpdate", surfaceId=surface_id, components=comps))
-    if resp.texto:
-        msgs.append(new_message("dataModelUpdate", surfaceId=surface_id, path="/meta", value={"texto": resp.texto}))
-    return msgs
+    return valid
 
 
-def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
+def _run_agent(session_id: str, mensaje: str, user_id: str) -> list:
     historial = db.get_resumen_interacciones(session_id)
     perfil = _perfil_ui(user_id)
 
@@ -137,16 +130,12 @@ def _run_agent(session_id: str, mensaje: str, user_id: str) -> list[dict]:
     try:
         resp = agent.run_muuk(prompt)
     except agent._ModeloSaturado:
-        # Gemini saturado tras reintentos: mensaje amable, no 500.
-        return [
-            new_message("dataModelUpdate", path="/meta",
-                value={"texto": "El agente está ocupado justo ahora. Intenta de nuevo en unos segundos."})
-        ]
+        return a2ui_stream.error_events(session_id,
+            "El agente está ocupado justo ahora. Intenta de nuevo en unos segundos.")
 
-    msgs = _to_surface(session_id, resp, user_id)
-    # A2UI: el perfil llega como dataModel en la primera surface — el frontend
-    # lo aplica como clase CSS (letra grande si senior) a todo el chat.
-    return msgs + [new_message("dataModelUpdate", path="/perfil", value=perfil)]
+    # Fail-closed: solo componentes del catálogo sobreviven.
+    resp.componentes = _limpiar_componentes(resp, user_id, session_id)
+    return a2ui_stream.run_events(session_id, resp, perfil)
 
 
 @app.post("/chat")
@@ -154,13 +143,15 @@ def chat(req: ChatRequest, request: Request):
     _check_rate(request.client.host if request.client else "demo")
     db.ensure_sesion(req.session_id, req.user_id)
     db.registrar_interaccion(req.session_id, "USER_MESSAGE", req.mensaje)
-    msgs = _run_agent(req.session_id, req.mensaje, req.user_id)
+    events = _run_agent(req.session_id, req.mensaje, req.user_id)
+
+    encoder = EventEncoder()
 
     def stream():
-        for m in msgs:
-            yield f"data: {json.dumps(m, default=str)}\n\n"
+        for e in events:
+            yield encoder.encode(e)
 
-    return StreamingResponse(stream(), media_type="application/a2ui+json")
+    return StreamingResponse(stream(), media_type=encoder.get_content_type())
 
 
 @app.post("/action")

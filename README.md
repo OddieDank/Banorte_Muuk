@@ -1,6 +1,6 @@
 # Banorte × Muuk
 
-Agente de IA que **construye la interfaz** en tiempo real: Usuario → Agno (Gemini) → FastMCP → A2UI → Tiger Data (Timescale Cloud).
+Agente de IA que **construye la interfaz** en tiempo real: Usuario → Agno (Gemini) → FastMCP → **A2UI v0.9 oficial sobre AG-UI** → Tiger Data (Timescale Cloud). Render: `@copilotkit/a2ui-renderer` (React), catálogo BYOC con Zod.
 
 ## Cómo correrlo (desde cero)
 
@@ -39,7 +39,8 @@ uvicorn api:app --port 8000
 ```bash
 cd Banorte_Muuk/frontend
 npm install
-npm run dev        # http://localhost:5173
+cp .env.example .env   # VITE_API_URL=http://localhost:8000
+npm run dev            # http://localhost:5173
 ```
 
 ### 3. Probar
@@ -64,11 +65,13 @@ npm run dev        # http://localhost:5173
 
 ## Arquitectura (resumen)
 
-- `server/catalog.py` — únicos componentes que el agente puede renderizar (fail-closed, anti UI-injection).
+- `server/catalog.py` — únicos componentes que el agente puede renderizar (fail-closed, anti UI-injection); el frontend espeja el catálogo con Zod.
+- `server/a2ui_stream.py` — componentes validados → ops A2UI v0.9 oficiales (`createSurface`/`updateComponents`/`updateDataModel`) envueltas en eventos AG-UI (`ACTIVITY_SNAPSHOT` a2ui-surface + TEXT/CUSTOM).
 - `server/mcp_server.py` — tools FastMCP; solo `aplicar_plan` escribe y requiere confirmación.
 - `server/agent.py` — Agno + Gemini; ruteo de intención por keywords + JSON parse robusto.
 - `server/db.py` — Tiger Data (PG-only); privacidad: el agente solo ve agregados (`transaccion_resumen`), el detalle crudo va directo al frontend por `GET /transacciones`.
-- `frontend/src/muuk/MuukChat.jsx` — cliente SSE: `/chat` → adapter A2UI → registry → componentes.
-- `frontend/src/a2ui/` — adapter + registry (subset A2UI v0.9.1 propio).
+- `frontend/src/muuk/MuukChat.jsx` — stream AG-UI → `useA2UI().processMessages()` → `<A2UIRenderer>`; onAction → `POST /action`.
+- `frontend/src/lib/a2ui/muukCatalog.jsx` — catálogo oficial: definiciones Zod + renderers (BYOC) vía `@copilotkit/a2ui-renderer`, id `muuk-catalog`.
+- `frontend/src/lib/registry.jsx` — registry interno al que delegan los renderers (los 10 componentes de `src/components/`), con tooltip `info`.
 
 Chequeo antes de push: `cd server && .venv/bin/python validate_a2ui.py` (5/5).

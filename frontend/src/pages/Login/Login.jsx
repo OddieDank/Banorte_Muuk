@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./Login.css";
 import logo from "../../public/banorte-logo.svg";
+import { API } from "../../lib/api";
 
 function Login({ onLogin }) {
 
@@ -21,7 +22,7 @@ function Login({ onLogin }) {
         setCargando(true);
 
         try {
-            const respuesta = await fetch(`${import.meta.env.VITE_API_URL}/login`, {
+            const respuesta = await fetch(`${API}/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

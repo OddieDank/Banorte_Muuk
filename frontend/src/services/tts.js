@@ -1,6 +1,8 @@
+import { API } from "../lib/api";
+
 export async function describirUI(texto) {
     try {
-            const respuesta = await fetch(`${import.meta.env.VITE_API_URL}/tts`, {
+            const respuesta = await fetch(`${API}/tts`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

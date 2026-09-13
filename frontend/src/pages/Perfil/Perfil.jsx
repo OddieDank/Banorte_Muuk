@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import muukCoin from "../../public/muuk_coin.png";
 import "./Perfil.css";
 
-const API = import.meta.env.VITE_API_URL;
+import { API } from "../../lib/api";
 
 function Perfil({ onBack }) {
     const [datos, setDatos] = useState(null);

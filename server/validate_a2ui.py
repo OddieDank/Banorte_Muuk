@@ -23,14 +23,14 @@ def validar_response(componentes: list) -> tuple[bool, list[dict]]:
 FIXTURES = [
     # (reponse, esperado_ok)
     ([{"type": "PlanDePago",
-      "props": {"mensaje": "Opciones",
+      "props": {"mensaje": "Opciones", "monto_original": 100,
                 "opciones": [{"meses": 12, "pago_mensual": 1, "cat": 30}],
                 "cta": "Aplicar"}}], True),
     ([{"type": "PlanDePago",
-      "props": {"mensaje": "malo", "opciones": []}}], True),  # vacío pero válido
+      "props": {"mensaje": "malo", "monto_original": 100, "opciones": []}}], True),  # vacío pero válido
     ([{"type": "ComponenteFalso", "props": {}}], False),
     ([{"type": "PlanDePago",
-      "props": {"mensaje": "X", "opciones": [{"meses": -1, "pago_mensual": 1, "cat": 30}]}}], False),
+      "props": {"mensaje": "X", "monto_original": 100, "opciones": [{"meses": -1, "pago_mensual": 1, "cat": 30}]}}], False),
     ([{"type": "TablaGastos",
       "props": {"titulo": "Gastos", "filas": [{"concepto": "x", "monto": 1, "categoria": "c"}]}}], True),
 ]
