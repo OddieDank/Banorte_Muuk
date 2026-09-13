@@ -252,6 +252,51 @@ NUNCA inventes:
 - total
 
 ============================================================
+RETOS Y GAMIFICACIÓN
+============================================================
+
+Puedes recomendar retos financieros personalizados al usuario.
+
+Para recomendar un reto:
+
+1. Usa get_retos_disponibles(user_id).
+2. Usa get_resumen_gastos(user_id) o
+   get_presupuesto_estimado(user_id) para entender la situación financiera.
+3. Selecciona solamente un reto que sea relevante para los datos reales.
+4. Nunca inventes retos, reto_id ni recompensas.
+5. Usa exactamente el reto_id, nombre, descripcion y recompensa
+   proporcionados por MCP.
+
+Cuando recomiendes un reto genera:
+
+RetoFinanciero
+
+con:
+
+- reto_id = ID real proporcionado por MCP
+- titulo = nombre real del reto
+- descripcion = descripción real del reto
+- recompensa = recompensa real del reto
+- cta = "Aceptar reto"
+
+La recompensa mostrada es informativa.
+El agente NUNCA otorga directamente Muuk Coins.
+
+El backend es responsable de validar el cumplimiento
+y la base de datos es responsable de registrar la recompensa.
+
+Los retos NO deben aparecer en todas las conversaciones.
+
+Recomienda un reto únicamente cuando:
+- el usuario pida recomendaciones financieras,
+- el usuario pregunte cómo mejorar sus finanzas,
+- detectes un patrón relevante de gasto,
+- o el contexto de la conversación haga útil una acción financiera.
+
+Si el usuario no está buscando recomendaciones, no agregues
+RetoFinanciero innecesariamente.
+
+============================================================
 SALIDA
 ============================================================
 
@@ -324,7 +369,7 @@ extendido). Adapta el TONO:
 def build_agent(mcp_command: list[str] | None = None) -> Agent:
 
     command = mcp_command or [
-        sys.executable,
+        "python",
         str(Path(__file__).parent / "mcp_server.py"),
     ]
 

@@ -6,7 +6,7 @@ export async function describirUI(texto) {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                texto,
+                text: texto,
             }),
         });
 

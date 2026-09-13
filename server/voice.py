@@ -1,11 +1,13 @@
-"""voice.py — Texto a voz para que Muuk describa la UI generada.
+"""voice.py — Texto a voz y voz a texto para Muuk.
 
-Modelo eleven_flash_v2_5: el más barato, soporta español. Cachea por texto
-para no regenerar audio idéntico mientras prueban (importa por el
-presupuesto limitado de créditos).
+TTS: eleven_flash_v2_5, el más barato, soporta español. Cachea por texto
+para no regenerar audio idéntico mientras prueban.
+
+STT: scribe_v2, para transcribir lo que dice el usuario.
 """
 
 import os
+from io import BytesIO
 
 from elevenlabs.client import ElevenLabs
 
@@ -18,7 +20,6 @@ _cache: dict[str, bytes] = {}
 def synthesize_speech(texto: str) -> bytes:
     if texto in _cache:
         return _cache[texto]
-    
 
     audio_stream = _client.text_to_speech.convert(
         text=texto,
@@ -29,3 +30,15 @@ def synthesize_speech(texto: str) -> bytes:
     audio_bytes = b"".join(audio_stream)
     _cache[texto] = audio_bytes
     return audio_bytes
+
+
+def transcribe_speech(audio_bytes: bytes) -> str:
+    audio_data = BytesIO(audio_bytes)
+    resultado = _client.speech_to_text.convert(
+        file=audio_data,
+        model_id="scribe_v2",
+        language_code="spa",
+        tag_audio_events=False,
+        diarize=False,
+    )
+    return resultado.text

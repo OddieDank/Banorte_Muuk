@@ -1,7 +1,7 @@
 import "./Sidebar.css";
 import muuk_logo from "../../public/logoMuukBlanco.png";
 
-function Sidebar({ onLogout }) {
+function Sidebar({ onLogout, onProfileClick }) {
     return (
         <aside className="sidebar">
 
@@ -13,7 +13,12 @@ function Sidebar({ onLogout }) {
                 <span>MUUK</span>
             </div>
 
-            <div className="sidebar-profile">
+            <div
+                className="sidebar-profile"
+                onClick={onProfileClick}
+                role="button"
+                tabIndex={0}
+            >
 
                 <div className="sidebar-profile-icon">
                     <svg

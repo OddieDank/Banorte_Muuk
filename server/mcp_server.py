@@ -95,6 +95,10 @@ def actualizar_preferencia(user_id: str, intencion_nombre: str, componente_nombr
     Ej: actualizar_preferencia('u1', 'PAGAR_DEUDA', 'PlanDePago', True)"""
     return db.actualizar_preferencia(user_id, intencion_nombre, componente_nombre, success)
 
+@mcp.tool
+def get_retos_disponibles(user_id: str) -> list:
+    """Retos activos que el usuario todavía no ha completado."""
+    return db.get_retos_disponibles(user_id)
 
 if __name__ == "__main__":
     mcp.run()

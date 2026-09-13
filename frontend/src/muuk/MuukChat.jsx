@@ -15,6 +15,7 @@ import "../components/TarjetaMetrica";
 import "../components/PlanDePago.css";
 import "../components/Graficas.css";
 import "./MuukChat.css";
+import { describirUI } from "../services/tts";
 
 const API = "http://localhost:8000";
 // user_id se lee en cada fetch: cachearlo en el módulo congela al primer
@@ -25,6 +26,7 @@ function MuukChat({ consulta }) {
     const [bloques, setBloques] = useState([]);
     const [cargando, setCargando] = useState(false);
     const [perfil, setPerfil] = useState("estandar");
+    const [vozActiva, setVozActiva] = useState(false);
     const surfacesRef = useRef({});
     const sessionRef = useRef(crypto.randomUUID());
 
@@ -64,6 +66,7 @@ function MuukChat({ consulta }) {
                         setPerfil(msg.value?.perfil === "senior" ? "senior" : "estandar");
                     } else if (msg.type === "dataModelUpdate" && msg.path === "/meta") {
                         setBloques((b) => [...b, { tipo: "texto", texto: msg.value.texto }]);
+                        if (vozActiva) describirUI(msg.value.texto);
                     } else {
                         surfacesRef.current = applyMessage(surfacesRef.current, msg);
                         if (msg.type === "surfaceUpdate") {
@@ -103,6 +106,13 @@ function MuukChat({ consulta }) {
 
     return (
         <section className={`muuk-chat ${perfil === "senior" ? "muuk-perfil-senior" : ""}`}>
+            <button
+                type="button"
+                className="voz-toggle"
+                onClick={() => setVozActiva((v) => !v)}
+            >
+                {vozActiva ? "🔊 Voz activada" : "🔇 Voz desactivada"}
+            </button>
             {bloques.map((b, i) =>
                 b.tipo === "surface" ? (
                     <div key={i} className="muuk-surface">
