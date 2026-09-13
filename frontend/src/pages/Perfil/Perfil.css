@@ -227,3 +227,123 @@
 .perfil-error {
     color: #b5121b;
 }
+
+/* =================================
+   MUUK COINS
+   ================================= */
+
+.perfil-coins-card {
+    margin-bottom: 20px;
+}
+
+.perfil-coins-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.perfil-coins-header h2 {
+    margin-bottom: 6px;
+}
+
+.perfil-coins-subtitulo {
+    margin: 0;
+
+    color: #777777;
+    font-size: 13px;
+}
+
+.perfil-coins-balance {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    color: #292929;
+}
+
+.perfil-coins-icon {
+    font-size: 26px;
+}
+
+.perfil-coins-divider {
+    height: 1px;
+
+    margin: 20px 0;
+
+    background-color: #eeeeee;
+}
+
+.perfil-coins-historial-titulo {
+    margin: 0 0 10px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    color: #292929;
+}
+
+.perfil-coins-lista {
+    list-style: none;
+
+    margin: 0;
+    padding: 0;
+}
+
+.perfil-coins-movimiento {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 12px 0;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+.perfil-coins-movimiento:last-child {
+    border-bottom: none;
+}
+
+.perfil-coins-movimiento-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.perfil-coins-descripcion {
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #292929;
+}
+
+.perfil-coins-tipo {
+    font-size: 12px;
+    color: #888888;
+    text-transform: capitalize;
+}
+
+.perfil-coins-cantidad {
+    font-size: 15px;
+    font-weight: 700;
+
+    color: #292929;
+
+    white-space: nowrap;
+}
+
+.perfil-coins-icon {
+    width: 42px;
+    height: 42px;
+    object-fit: contain;
+}
+
+.perfil-coins-icon-small {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    margin-left: 4px;
+}
