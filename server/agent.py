@@ -384,7 +384,11 @@ def build_agent(mcp_command: list[str] | None = None) -> Agent:
         ),
         tools=[
             MCPTools(
-                command=" ".join(command)
+                command=" ".join(command),
+                # fastmcp tarda ~10s en arrancar (importa un árbol de deps);
+                # con el default de 10s el initialize se cae en cold start
+                # (Render free) y agno lo traga → agente sin tools → alucina.
+                timeout_seconds=60,
             )
         ],
         instructions=INSTRUCTIONS,
