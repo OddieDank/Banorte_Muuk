@@ -235,7 +235,7 @@ ESTILO
 def build_agent(mcp_command: list[str] | None = None) -> Agent:
 
     command = mcp_command or [
-        sys.executable,
+        "python",
         str(Path(__file__).parent / "mcp_server.py"),
     ]
 

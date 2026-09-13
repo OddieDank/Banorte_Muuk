@@ -109,6 +109,20 @@
     color: #b5121b;
 }
 
+.search-voice-active {
+    color: #b5121b;
+    animation: pulso-escuchando 1.2s ease-in-out infinite;
+}
+
+@keyframes pulso-escuchando {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.4;
+    }
+}
+
 
 /* =================================
    BUSCAR
@@ -127,3 +141,4 @@
     color: #b5121b;
     background-color: #eeeeee;
 }
+
