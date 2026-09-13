@@ -153,3 +153,70 @@
     font-size: 13px;
     color: #777777;
 }
+
+/* ── Línea (tendencia) ────────────────────────────────────────────────── */
+
+.muuk-linea {
+    width: 100%;
+}
+
+.muuk-linea-grid {
+    stroke: #f0f0f0;
+    stroke-width: 0.4;
+}
+
+.muuk-linea-path {
+    stroke: #b5121b;
+    stroke-width: 1.2;
+}
+
+.muuk-linea-pt {
+    fill: #e5a0a4;
+    transition: r 0.15s ease;
+}
+
+.muuk-linea-pt.activa {
+    fill: #b5121b;
+}
+
+.muuk-linea-val {
+    font-size: 4.5px;
+    font-weight: 600;
+    fill: #b5121b;
+}
+
+.muuk-linea-etq {
+    font-size: 4.2px;
+    fill: #777777;
+    text-transform: capitalize;
+}
+
+/* ── Progreso (meta de ahorro) ────────────────────────────────────────── */
+
+.muuk-progreso {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.muuk-progreso-cifra {
+    font-size: 32px;
+    font-weight: 700;
+    color: #3a7d44;
+    line-height: 1;
+}
+
+.muuk-progreso-pista {
+    height: 12px;
+    border-radius: 6px;
+    background: #f0f0f0;
+    overflow: hidden;
+}
+
+.muuk-progreso-barra {
+    height: 100%;
+    border-radius: 6px;
+    background: #3a7d44;
+    transition: width 0.4s ease;
+}

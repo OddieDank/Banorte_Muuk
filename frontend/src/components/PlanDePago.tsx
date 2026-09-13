@@ -24,6 +24,9 @@ register("PlanDePago", ({ props, dispatch }: { props: Record<string, unknown>; d
             type="button"
             className={`muuk-opcion-card${i === sel ? " seleccionada" : ""}`}
             onClick={() => setSel(i)}
+            data-tip={o.total
+              ? `A ${o.meses} meses pagas ${formato(o.total)} en total (CAT ${o.cat}%)`
+              : `Plazo de ${o.meses} meses con CAT ${o.cat}%`}
           >
             <span className="muuk-opcion-meses">{o.meses} meses</span>
             <span className="muuk-opcion-pago">{formato(o.pago_mensual)}<small>/mes</small></span>

@@ -35,16 +35,18 @@ register("GraficaPastel", ({ props, dispatch }: { props: Record<string, unknown>
         <svg viewBox="0 0 42 42" className="muuk-donut">
           <circle cx="21" cy="21" r="15.9155" fill="none" stroke="#f0f0f0" strokeWidth="6" />
           {rebanadas.map((r, i) => (
-            <circle
-              key={i}
-              cx="21" cy="21" r="15.9155" fill="none"
-              stroke={r.color}
-              strokeWidth={sel === i ? 7.5 : 6}
-              strokeDasharray={`${r.pct} ${100 - r.pct}`}
-              strokeDashoffset={r.offset}
-              onClick={() => elegir(i)}
-              style={{ cursor: "pointer", transition: "stroke-width 0.15s" }}
-            />
+          <circle
+            key={i}
+            cx={21} cy={21} r={15.9155} fill="none"
+            stroke={r.color}
+            strokeWidth={sel === i ? 7.5 : 6}
+            strokeDasharray={`${r.pct} ${100 - r.pct}`}
+            strokeDashoffset={r.offset}
+            onClick={() => elegir(i)}
+            style={{ cursor: "pointer", transition: "stroke-width 0.15s" }}
+          >
+            <title>{`${r.etiqueta}: ${formato(r.valor)} (${Math.round(r.pct)}%)`}</title>
+          </circle>
           ))}
           <text x="21" y="20" textAnchor="middle" className="muuk-donut-total">{formato(total)}</text>
           <text x="21" y="25" textAnchor="middle" className="muuk-donut-label">
@@ -53,7 +55,8 @@ register("GraficaPastel", ({ props, dispatch }: { props: Record<string, unknown>
         </svg>
         <ul className="muuk-leyenda">
           {rebanadas.map((r, i) => (
-            <li key={i} onClick={() => elegir(i)} className={sel === i ? "activa" : ""}>
+            <li key={i} onClick={() => elegir(i)} className={sel === i ? "activa" : ""}
+                data-tip={`${Math.round(r.pct)}% del total (${formato(r.valor)})`}>
               <span className="muuk-dot" style={{ background: r.color }} />
               <span className="muuk-leyenda-nombre">{r.etiqueta}</span>
               <b>{formato(r.valor)}</b>

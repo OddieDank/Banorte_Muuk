@@ -31,7 +31,8 @@ register("TablaGastos", ({ props }: { props: Record<string, unknown> }) => {
     <div className="muuk-plan">
       <h3 className="muuk-title">{String(props.titulo ?? "Gastos")}</h3>
       {filas.map((f, i) => (
-        <div key={i} className="muuk-fila">
+        <div key={i} className="muuk-fila"
+             data-tip={total > 0 ? `${Math.round((f.monto / total) * 100)}% del total` : ""}>
           <div className="muuk-fila-info">
             <span>{f.concepto === f.categoria ? f.concepto : `${f.concepto} · ${f.categoria}`}</span>
             <b>{formato(f.monto)}</b>

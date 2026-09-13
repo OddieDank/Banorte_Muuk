@@ -3,11 +3,20 @@
 Los únicos componentes que el agente puede renderizar viven aquí.
 El servidor valida cada salida del LLM contra este catálogo antes de SSE;
 componente desconocido → fallo cerrado (anti UI-injection).
+
+"info" (prop opcional, heredada de InfoMixin): frase explicativa que el
+frontend muestra como tarjeta al poner el cursor encima del componente.
 """
 
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
+
+
+# ── Propiedad común: tarjeta de info al cursor ───────────────────────────
+
+class InfoMixin(BaseModel):
+    info: Optional[str] = None
 
 
 # ── Componentes del catálogo ──────────────────────────────────────────────
@@ -18,7 +27,7 @@ class OpcionPago(BaseModel):
     cat: float = Field(gt=0, le=1000)
     total: Optional[float] = None
 
-class PlanDePago(BaseModel):
+class PlanDePago(InfoMixin):
     mensaje: str
     monto_original: float = Field(gt=0)
     opciones: list[OpcionPago]
@@ -29,7 +38,7 @@ class FilaGasto(BaseModel):
     monto: float
     categoria: str
 
-class TablaGastos(BaseModel):
+class TablaGastos(InfoMixin):
     titulo: str
     # Dos modos: filas literales (agregados) o dataRef (el frontend trae el
     # detalle directo del API; el LLM nunca ve transacciones crudas).
@@ -44,7 +53,7 @@ class Segmento(BaseModel):
     etiqueta: str
     valor: float = Field(gt=0)
 
-class GraficaPastel(BaseModel):
+class GraficaPastel(InfoMixin):
     titulo: str
     segmentos: list[Segmento]
 
@@ -52,14 +61,33 @@ class Barra(BaseModel):
     etiqueta: str
     valor: float = Field(gt=0)
 
-class GraficaBarras(BaseModel):
+class GraficaBarras(InfoMixin):
     titulo: str
     barras: list[Barra]
 
-class TarjetaMetrica(BaseModel):
+class Punto(BaseModel):
+    etiqueta: str
+    valor: float = Field(gt=0)
+
+class GraficaLinea(InfoMixin):
+    titulo: str
+    puntos: list[Punto]
+
+class TarjetaMetrica(InfoMixin):
     titulo: str
     valor: str  # ya formateado: "$8,500" o "+18.4%"
     subtitulo: Optional[str] = None
+
+class ProgresoMeta(InfoMixin):
+    titulo: str
+    actual: float = Field(ge=0)
+    meta: float = Field(gt=0)
+
+class ComandoUI(BaseModel):
+    """Comandos de interfaz: el frontend los ejecuta localmente (modo oscuro,
+    exportar PDF). El dispatch igual se registra para aprendizaje."""
+    accion: Literal["modo_oscuro", "exportar_pdf"]
+    label: Optional[str] = None
 
 # Catálogo: type → schema de props. Cualquier otro type se rechaza.
 CATALOG: dict[str, type[BaseModel]] = {
@@ -68,7 +96,10 @@ CATALOG: dict[str, type[BaseModel]] = {
     "Confirmacion": Confirmacion,
     "GraficaPastel": GraficaPastel,
     "GraficaBarras": GraficaBarras,
+    "GraficaLinea": GraficaLinea,
     "TarjetaMetrica": TarjetaMetrica,
+    "ProgresoMeta": ProgresoMeta,
+    "ComandoUI": ComandoUI,
 }
 
 

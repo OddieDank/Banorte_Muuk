@@ -24,7 +24,8 @@ register("GraficaBarras", ({ props, dispatch }: { props: Record<string, unknown>
       <h3 className="muuk-title">{String(props.titulo ?? "Por periodo")}</h3>
       <div className="muuk-barras">
         {barras.map((b, i) => (
-          <button key={i} type="button" className="muuk-barra-col" onClick={() => elegir(i)}>
+          <button key={i} type="button" className="muuk-barra-col" onClick={() => elegir(i)}
+                  data-tip={`${b.etiqueta}: ${formato(b.valor)}`}>
             <span className="muuk-barra-valor">{sel === i ? formato(b.valor) : ""}</span>
             <span
               className={`muuk-barra-rect${sel === i ? " activa" : ""}`}

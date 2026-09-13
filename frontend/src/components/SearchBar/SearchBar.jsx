@@ -10,6 +10,7 @@ function SearchBar({ onSearch }) {
         if (onSearch) {
             onSearch(query);
         }
+        setQuery(""); // limpia la barra al enviar
     };
 
     const handleKeyDown = (event) => {

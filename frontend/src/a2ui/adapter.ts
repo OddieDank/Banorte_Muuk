@@ -1,6 +1,5 @@
 // Adapter A2UI mínimo: paseSSE → acciones sobre state de surfaces.
-import type { A2UIMessage, OneOffAction } from "./types";
-import type { Surface, ComponentSpec } from "./types";
+import type { A2UIMessage, Surface, ComponentSpec } from "./types";
 
 export function applyMessage(surfaces: Record<string, Surface>, msg: A2UIMessage): Record<string, Surface> {
   const m = msg as any;

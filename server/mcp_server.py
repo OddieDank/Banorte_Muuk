@@ -39,6 +39,13 @@ def get_resumen_gastos(user_id: str, meses: int = 3) -> list:
 
 
 @mcp.tool
+def get_presupuesto_estimado(user_id: str) -> list:
+    """Semáforo de presupuesto por categoría: promedio histórico vs mes actual.
+    Read-only; estado: sobre / al_limite / bajo."""
+    return db.get_presupuesto_estimado(user_id)
+
+
+@mcp.tool
 def simular_plan_pago(user_id: str, cat: float, meses: int = 12) -> dict:
     """Simula reestructura de deuda. Read-only.
     Devuelve monto_original (deuda real) y varias opciones de plazo:
