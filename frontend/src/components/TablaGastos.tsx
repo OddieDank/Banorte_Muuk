@@ -5,7 +5,7 @@ import { register } from "../lib/registry";
 
 interface Fila { concepto: string; monto: number; categoria: string; }
 
-const API = import.meta.env.VITE_API_URL;
+import { API } from "../lib/api";
 const formato = (n: number) => n.toLocaleString("es-MX", { style: "currency", currency: "MXN" });
 
 register("TablaGastos", ({ props }: { props: Record<string, unknown> }) => {
