@@ -410,9 +410,20 @@ def _get_agent() -> Agent:
 
         _AGENT = build_agent()
 
-        _LOOP.run_until_complete(
-            _AGENT.tools[0].connect()
-        )
+        # El servidor MCP tarda en arrancar en frío (importa fastmcp/psycopg2)
+        # y agno TRAGA el timeout de connect() dejando al agente SIN tools —
+        # ahí Gemini alucina las cifras. Reintenta y exige tools cargadas.
+        tools = _AGENT.tools[0]
+
+        for intento in range(3):
+            _LOOP.run_until_complete(tools.connect(force=bool(intento)))
+            if tools.functions:
+                break
+            time.sleep(1)
+
+        if not tools.functions:
+            _AGENT = None  # el próximo request reintenta desde cero
+            raise RuntimeError("MCP no conectó: agente sin herramientas")
 
     return _AGENT
 

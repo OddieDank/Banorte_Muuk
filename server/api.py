@@ -134,6 +134,10 @@ def _run_agent(session_id: str, mensaje: str, user_id: str) -> list:
     except agent._ModeloSaturado:
         return a2ui_stream.error_events(session_id,
             "El agente está ocupado justo ahora. Intenta de nuevo en unos segundos.")
+    except Exception:
+        # Fail-closed: sin datos de MCP no se responde con texto inventado.
+        return a2ui_stream.error_events(session_id,
+            "No pude conectar con tus datos. Intenta de nuevo en unos segundos.")
 
     # Fail-closed: solo componentes del catálogo sobreviven.
     resp.componentes = _limpiar_componentes(resp, user_id, session_id)
