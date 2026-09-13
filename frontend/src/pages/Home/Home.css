@@ -94,10 +94,5 @@
 }
 
 .tts-button:hover {
-    background-color: #d40024;
-    color: #ffffff;
-}
-
-.tts-button:active {
     transform: translateY(1px);
 }

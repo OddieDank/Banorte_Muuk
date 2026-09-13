@@ -9,8 +9,6 @@ import ActionCard from "../../components/ActionCard/ActionCard";
 import MuukChat from "../../muuk/MuukChat";
 import Perfil from "../Perfil/Perfil";
 
-import { describirUI } from "../../services/tts";
-
 function Home({ onLogout }) {
 
     const username = localStorage.getItem("username") || "Usuario";
@@ -56,16 +54,6 @@ function Home({ onLogout }) {
 
                         </section>
 
-                        <button
-                            className="tts-button"
-                            onClick={() =>
-                                describirUI(
-                                    "Bienvenido al asistente digital de Banorte."
-                                )
-                            }
-                        >
-                            Escuchar presentación
-                        </button>
                     </>
                 )}
 
