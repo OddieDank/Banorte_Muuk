@@ -1,4 +1,5 @@
 import "./Sidebar.css";
+import muuk_logo from "../../public/logoMuukBlanco.png";
 
 function Sidebar({ onLogout }) {
     return (
@@ -6,7 +7,7 @@ function Sidebar({ onLogout }) {
 
             <div className="sidebar-brand">
                 <div className="sidebar-brand-mark">
-                    M
+                    <img className="sidebar-profile-img" src={muuk_logo} alt="MUUK" />
                 </div>
 
                 <span>MUUK</span>
@@ -16,8 +17,8 @@ function Sidebar({ onLogout }) {
 
                 <div className="sidebar-profile-icon">
                     <svg
-                        width="26"
-                        height="26"
+                        width="30"
+                        height="30"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
