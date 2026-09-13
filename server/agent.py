@@ -36,7 +36,7 @@ load_dotenv(Path(__file__).parent / ".env")
 from agno.agent import Agent
 from agno.models.google import Gemini
 from agno.tools.mcp import MCPTools
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from catalog import CATALOG, validar_componente
 
@@ -47,7 +47,16 @@ from catalog import CATALOG, validar_componente
 
 class Componente(BaseModel):
     type: str
-    props: dict
+    props: dict = Field(default_factory=dict)
+
+
+def _normalizar_componentes(data: dict) -> dict:
+    """Gemini a veces aplana las props al nivel del componente en lugar de
+    anidarlas bajo "props". Se acepta y se re-anida antes de validar."""
+    for c in data.get("componentes", []):
+        if isinstance(c, dict) and "props" not in c and "type" in c:
+            c["props"] = {k: v for k, v in c.items() if k != "type"}
+    return data
 
 
 class MuukResponse(BaseModel):
@@ -389,12 +398,12 @@ def _extract_json(raw: str) -> dict:
 def _validate_response(data: dict) -> MuukResponse:
 
     """
-    Valida:
-
-    1. estructura MuukResponse
-    2. componentes existentes
-    3. props contra catálogo
+    Degradación suave: componente mal formado se descarta (fail-closed
+    por componente), no se tumba toda la respuesta. Re-anida los props
+    aplanados de Gemini antes de validar contra el catálogo.
     """
+
+    _normalizar_componentes(data)
 
     response = MuukResponse.model_validate(data)
 
@@ -402,17 +411,18 @@ def _validate_response(data: dict) -> MuukResponse:
 
     for component in response.componentes:
 
-        if not validar_componente(
+        if validar_componente(
             component.type,
             component.props,
         ):
-            raise ValueError(
-                f"Componente A2UI inválido: "
-                f"{component.type}"
+            valid_components.append(component)
+        else:
+            print(
+                "[run_muuk] Componente descartado:",
+                component.type,
             )
 
-        valid_components.append(component)
-
+    # Si NO hay componente válido pero el texto sí, degradamos a texto.
     response.componentes = valid_components
 
     return response
