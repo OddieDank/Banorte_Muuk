@@ -385,6 +385,10 @@ def build_agent(mcp_command: list[str] | None = None) -> Agent:
         tools=[
             MCPTools(
                 command=" ".join(command),
+                # El SDK MCP filtra las env vars del subproceso a una lista
+                # "segura" (PATH, HOME…): DATABASE_URL NO llegaba al server
+                # MCP en Render (sin .env ahí) y db.py tronaba en import.
+                env={"DATABASE_URL": os.environ["DATABASE_URL"]},
                 # fastmcp tarda ~10s en arrancar (importa un árbol de deps);
                 # con el default de 10s el initialize se cae en cold start
                 # (Render free) y agno lo traga → agente sin tools → alucina.
