@@ -18,6 +18,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from fastapi import UploadFile, File
 #elevenLabs
 import voice
 
@@ -190,3 +191,10 @@ def tts(req: TTSRequest, request: Request):
     _check_rate(request.client.host if request.client else "demo")
     audio = voice.synthesize_speech(req.text)  # antes decía req.texto
     return StreamingResponse(iter([audio]), media_type="audio/mpeg")
+
+@app.post("/stt")
+async def stt(request: Request, file: UploadFile = File(...)):
+    _check_rate(request.client.host if request.client else "demo")
+    audio_bytes = await file.read()
+    texto = voice.transcribe_speech(audio_bytes)
+    return {"text": texto}

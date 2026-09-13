@@ -15,6 +15,7 @@ import "../components/TarjetaMetrica";
 import "../components/PlanDePago.css";
 import "../components/Graficas.css";
 import "./MuukChat.css";
+import { describirUI } from "../services/tts";
 
 const API = "http://localhost:8000";
 // user_id se lee en cada fetch: cachearlo en el módulo congela al primer
@@ -64,6 +65,7 @@ function MuukChat({ consulta }) {
                         setPerfil(msg.value?.perfil === "senior" ? "senior" : "estandar");
                     } else if (msg.type === "dataModelUpdate" && msg.path === "/meta") {
                         setBloques((b) => [...b, { tipo: "texto", texto: msg.value.texto }]);
+                        describirUI(msg.value.texto);
                     } else {
                         surfacesRef.current = applyMessage(surfacesRef.current, msg);
                         if (msg.type === "surfaceUpdate") {
